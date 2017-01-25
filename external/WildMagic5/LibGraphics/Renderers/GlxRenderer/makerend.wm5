@@ -1,0 +1,127 @@
+CFG ?= Debug
+
+CC := /usr/bin/g++
+CFLAGS := -c -D__LINUX__ -DWM5_USE_OPENGL
+
+ifeq (Debug,$(findstring Debug,$(CFG)))
+CFLAGS += -g -D_DEBUG
+else
+CFLAGS += -O2 -DNDEBUG
+endif
+
+LIBPATH := ../../../SDK/Library/$(CFG)
+
+ifeq (Dynamic,$(findstring Dynamic,$(CFG)))
+SOVER = 5
+RELVER = $(SOVER).14
+CFLAGS += -fPIC
+AR := $(CC)
+ARFLAGS := $(LDFLAGS) -L $(LIBPATH) -shared -fPIC -Wl,-soname,libWm5Graphics.so.$(SOVER) -lWm5Core -lWm5Mathematics -o
+LIB := $(LIBPATH)/libWm5Graphics.so.$(RELVER)
+else
+AR := /usr/bin/ar
+ARFLAGS := rs
+LIB := $(LIBPATH)/libWm5Graphics.a
+endif
+
+INCPATH := \
+    -I /usr/X11R6/include \
+    -I /usr/include \
+    -I . \
+    -I ../. \
+    -I ../OpenGLRenderer \
+    -I ../../DataTypes \
+    -I ../../GlobalEffects \
+    -I ../../Resources \
+    -I ../../SceneGraph \
+    -I ../../ShaderFloats \
+    -I ../../Shaders \
+    -I ../../../SDK/Include
+INCDIR := ../../../SDK/Include
+RENINC := ../Wm5Renderer.h ../Wm5Renderer.inl ../Wm5Renderers.h
+GLXINC := $(wildcard *.h)
+OGLINC := $(wildcard ../OpenGLRenderer/*.h)
+OGLINC := $(notdir $(OGLINC))
+OGLINC := $(OGLINC:%.h=../OpenGLRenderer/%.h)
+INC := $(RENINC) $(GLXINC) $(OGLINC)
+RENSRC := ../Wm5Renderer.cpp
+GLXSRC := $(wildcard *.cpp)
+GLXSRC := $(notdir $(GLXSRC))
+OGLSRC := $(wildcard ../OpenGLRenderer/*.cpp)
+OGLSRC := $(notdir $(OGLSRC))
+OBJDIR := ../../$(CFG)
+RENOBJ := $(OBJDIR)/Wm5Renderer.o
+GLXOBJ := $(GLXSRC:%.cpp=$(OBJDIR)/%.o)
+OGLOBJ := $(OGLSRC:%.cpp=$(OBJDIR)/%.o)
+OBJ := $(RENOBJ) $(OGLOBJ) $(GLXOBJ)
+
+build : $(OBJ)
+	$(AR) $(ARFLAGS) $(LIB) $(OBJDIR)/*.o
+	cp -fp $(INC) $(INCDIR)
+
+$(OBJDIR)/Wm5Renderer.o : ../Wm5Renderer.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5GlxExtensions.o : Wm5GlxExtensions.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5GlxRenderer.o : Wm5GlxRenderer.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5GlxRendererData.o : Wm5GlxRendererData.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5GlExtensions.o : ../OpenGLRenderer/Wm5GlExtensions.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5GlPlugin.o : ../OpenGLRenderer/Wm5GlPlugin.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLIndexBuffer.o : ../OpenGLRenderer/Wm5OpenGLIndexBuffer.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLMapping.o : ../OpenGLRenderer/Wm5OpenGLMapping.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLPixelShader.o : ../OpenGLRenderer/Wm5OpenGLPixelShader.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLRenderer.o : ../OpenGLRenderer/Wm5OpenGLRenderer.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLRendererData.o : ../OpenGLRenderer/Wm5OpenGLRendererData.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLRenderTarget.o : ../OpenGLRenderer/Wm5OpenGLRenderTarget.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLShader.o : ../OpenGLRenderer/Wm5OpenGLShader.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLTexture1D.o : ../OpenGLRenderer/Wm5OpenGLTexture1D.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLTexture2D.o : ../OpenGLRenderer/Wm5OpenGLTexture2D.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLTexture3D.o : ../OpenGLRenderer/Wm5OpenGLTexture3D.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLTextureCube.o : ../OpenGLRenderer/Wm5OpenGLTextureCube.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLVerdanaS16B0I0.o : ../OpenGLRenderer/Wm5OpenGLVerdanaS16B0I0.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLVertexBuffer.o : ../OpenGLRenderer/Wm5OpenGLVertexBuffer.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLVertexFormat.o : ../OpenGLRenderer/Wm5OpenGLVertexFormat.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+$(OBJDIR)/Wm5OpenGLVertexShader.o : ../OpenGLRenderer/Wm5OpenGLVertexShader.cpp
+	$(CC) $(INCPATH) $(CFLAGS) $< -o $@
+
+clean :
+	rm -rf $(LIB)
+	rm -rf $(OBJDIR)
