@@ -252,23 +252,23 @@ public:
 
 	// iterator over item values at valid indices (ie non-zero refcount)
 	// also provides index() function to retrieve current index
-	class item_iterator : public base_iterator
+    class item_iterator : public base_iterator
 	{
 	public:
         inline int index() const {
-            return m_nIndex;
+            return this->m_nIndex;
         }
 		inline Type & operator*() { 
-			return (*p)[m_nIndex];
+            return (*(this->p))[this->m_nIndex];
 		}
 
 		inline item_iterator & operator++() {		// prefix
-			goto_next();
+			this->goto_next();
 			return *this;
 		}
 		inline item_iterator operator++(int) {		// postfix
 			item_iterator copy(*this);
-			goto_next();
+			this->goto_next();
 			return copy;
 		}
 
@@ -296,16 +296,16 @@ public:
 	{
 	public:
 		inline int operator*() const { 
-			return m_nIndex;
+			return this->m_nIndex;
 		}
 
 		inline index_iterator & operator++() {		// prefix
-			goto_next();
+			this->goto_next();
 			return *this;
 		}
 		inline index_iterator operator++(int) {		// postfix
 			index_iterator copy(*this);
-			goto_next();
+			this->goto_next();
 			return copy;
 		}
 
@@ -326,8 +326,8 @@ public:
 	class index_wrapper
 	{
 	public:
-		typename rcvector * pVector;
-		index_wrapper( typename rcvector * p ) { pVector = p; }
+		rcvector * pVector;
+		index_wrapper( rcvector * p ) { pVector = p; }
 		typename rcvector::index_iterator begin() { return pVector->begin_indices(); }
 		typename rcvector::index_iterator end() { return pVector->end_indices(); }
 	};

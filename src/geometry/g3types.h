@@ -11,11 +11,14 @@
 #include <memory>
 #include <limits>
 
-
-#ifdef GEOMETRY3_DLL_EXPORT
-#define g3External   __declspec( dllexport )  
+#ifdef WIN32
+    #ifdef GEOMETRY3_DLL_EXPORT
+    #define g3External   __declspec( dllexport )
+    #else
+    #define g3External   __declspec( dllimport )
+    #endif
 #else
-#define g3External   __declspec( dllimport )  
+    #define g3External
 #endif
 
 

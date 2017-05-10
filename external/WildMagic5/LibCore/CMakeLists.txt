@@ -15,6 +15,15 @@ target_include_directories ( ${LIBCORENAME} PUBLIC "IO" )
 target_include_directories ( ${LIBCORENAME} PUBLIC "Utility" )
 
 
+# disable warnings
+if (APPLE)
+	target_compile_options(${LIBCORENAME} PRIVATE "-Wno-unused-private-field")
+endif ()
+
+
+
+
+
 # [RMS] configure source groups for visual studio project
 
 source_group ( "IO" FILES ${wml_io} )

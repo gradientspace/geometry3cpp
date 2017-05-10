@@ -1,12 +1,16 @@
-
+#
+# GTEngine 3.8
+# rms@rms80.com
+#
 
 file ( GLOB HDR_BASE "Include/*.h" )
 file ( GLOB HDR_MATH "Include/Mathematics/*.h" )
 file ( GLOB HDR_IMG "Include/Imagics/*.h" )
 file ( GLOB HDR_LOW "Include/LowLevel/*.h" )
 
-file ( GLOB_RECURSE SRC_MATH "Source/Mathematics/*.cpp" )
-file ( GLOB_RECURSE SRC_IMG "Source/Imagics/*.cpp" )
+file ( GLOB SRC_MATH "Source/Mathematics/*.cpp" )
+# TODO: on windows, have to add Source/Mathematics/MSW
+file ( GLOB SRC_IMG "Source/Imagics/*.cpp" )
 
 add_library ( GTEngine ${HDR_BASE} ${HDR_MATH} ${HDR_IMG} ${HDR_LOW} ${SRC_MATH} ${SRC_IMG} )
 
@@ -14,6 +18,12 @@ target_include_directories ( GTEngine PUBLIC "Include" )
 target_include_directories ( GTEngine PUBLIC "Include/Mathematics" )
 target_include_directories ( GTEngine PUBLIC "Include/Imagics" )
 target_include_directories ( GTEngine PUBLIC "Include/LowLevel" )
+
+
+# disable warnings
+if (APPLE)
+	target_compile_options(GTEngine PRIVATE "-Wno-missing-braces")
+endif ()
 
 
 # [RMS] configure source groups for visual studio project

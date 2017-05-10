@@ -14,8 +14,8 @@ include ("cmake/PCHSupportV3.cmake")
 
 
 if (APPLE)
-	# tell xcode to use C++11 language & std library
-	set (CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+	# tell xcode to use C++14 language & std library
+	set (CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")
 	set (CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")	
 endif ()
 
