@@ -12,24 +12,27 @@
 #include <GTImagics.h>
 
 #if !defined(__APPLE__)
-#include <GTGraphics.h>
-#include <GTPhysics.h>
+// [RMS] nope!
+//#include <GTGraphics.h>
+//#include <GTPhysics.h>
 #endif
 
-#if defined(__MSWINDOWS__)
-#if defined(GTE_DEV_OPENGL)
-#include <GTGraphicsGL4.h>
-#elif defined(GTE_USE_DX12)
-#include <GTGraphicsDX12.h>
-#else
-#include <GTGraphicsDX11.h>
-#endif
-#endif
+// [RMS] nope!
+//#if defined(__MSWINDOWS__)
+//#if defined(GTE_DEV_OPENGL)
+//#include <GTGraphicsGL4.h>
+//#elif defined(GTE_USE_DX12)
+//#include <GTGraphicsDX12.h>
+//#else
+//#include <GTGraphicsDX11.h>
+//#endif
+//#endif
 
 #if defined(__LINUX__)
 #include <GTGraphicsGL4.h>
 #endif
 
 #if !defined(__APPLE__)
-#include <GTApplications.h>
+// [RMS] nope!
+//#include <GTApplications.h>
 #endif

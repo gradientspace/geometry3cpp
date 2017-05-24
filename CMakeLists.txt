@@ -1,5 +1,14 @@
+#
+# Top-level CMake file for geometry3 library
+# Ryan Schmidt - rms@rms80.com
+#
+
 cmake_minimum_required (VERSION 3.4.0)
 project (geometry3)
+
+
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
 # PCH macros:
@@ -67,3 +76,4 @@ set ( F3TBB_Include ${F3TBB_Root}/include )
 #add_subdirectory (GTEngine)
 add_subdirectory (src)
 add_subdirectory (external)
+add_subdirectory (test)

@@ -79,6 +79,11 @@ public:
 	const float * GetPosition(unsigned int k) const { 
 		return &m_vPositions[3*k]; 
 	}
+	void SetPosition( unsigned int k, float x, float y, float z ) {
+		float * f = &m_vPositions[3*k];
+		f[0] = x; f[1] = y; f[2] = z;
+	}
+
 	float * GetNormal(unsigned int k) { 
 		return &m_vNormals[3*k]; 
 	}
@@ -108,6 +113,12 @@ public:
 	void GetTriangle(unsigned int k, unsigned int  * iTri) const;
 	void GetTriangle(unsigned int k, g3::Vector3f & v0, g3::Vector3f & v1, g3::Vector3f & v2) const;
 	void GetTriangle(unsigned int k, g3::Vector3f * pTri) const;
+
+	void SetTriangle( unsigned int k, int a, int b, int c ) {
+		unsigned int * t = &m_vIndices[3*k];
+		t[0] = a; t[1] = b; t[2] = c;
+	}
+
 	g3::Vector3f GetTriangleNormal(unsigned int k) const;
 
 	void EstimateNormals();
