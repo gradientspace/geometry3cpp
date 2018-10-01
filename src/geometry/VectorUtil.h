@@ -16,7 +16,7 @@ namespace g3
 	 */
 	template <class Real>
 	void ComputeAlignZAxisMatrix( const Vector3<Real> & vAlignWith,
-											  Matrix3<Real> & matrix, bool bToZAxis = false );
+								  Matrix3<Real> & matrix, bool bToZAxis = false );
 
 	template <class Real>
 	void ComputeAlignAxisMatrix( const Vector3<Real> & vInitial,
@@ -139,17 +139,18 @@ namespace g3
 	}
 
 
-	inline Matrix2f d2f(const Matrix2d & vv) {
-		const double * v = vv; return Matrix2f((float)v[0], (float)v[1], (float)v[2], (float)v[3]);
+	// [RMS] throws errors?
+	inline Matrix2f d2f(const Matrix2d & v) {
+		return v.cast<float>();
 	}
-	inline Matrix3f d2f(const Matrix3d & vv) {
-		const double * v = vv; return Matrix3f((float)v[0], (float)v[1], (float)v[2], (float)v[3], (float)v[4], (float)v[5], (float)v[6], (float)v[7], (float)v[8]);
+	inline Matrix3f d2f(const Matrix3d & v) {
+		return v.cast<float>();
 	}
-	inline Matrix3d f2d(const Matrix3f & vv) {
-		const float * v = vv; return Matrix3d((double)v[0], (double)v[1], (double)v[2], (double)v[3], (double)v[4], (double)v[5], (double)v[6], (double)v[7], (double)v[8]);
+	inline Matrix3d f2d(const Matrix3f & v) {
+		return v.cast<double>();
 	}
-	inline Matrix2d f2d(const Matrix2f & vv) {
-		const float * v = vv; return Matrix2d((double)v[0], (double)v[1], (double)v[2], (double)v[3]);
+	inline Matrix2d f2d(const Matrix2f & v) {
+		return v.cast<double>();
 	}
 
 
@@ -182,7 +183,7 @@ namespace g3
 		pBuffer[3*nIndex] += pAdd[0]; pBuffer[3*nIndex+1] += pAdd[1]; pBuffer[3*nIndex+2] += pAdd[2];
 	}
 	inline void array3f_normalize( float * pBuffer, unsigned int nIndex, float fEpsilon = 0.0f ) {
-		auto v = Vector3f(&pBuffer[3*nIndex]).Normalized(fEpsilon);
+		auto v = Vector3f(&pBuffer[3 * nIndex]).normalized();
 		pBuffer[3*nIndex] = v[0]; pBuffer[3*nIndex+1] = v[1]; pBuffer[3*nIndex+2] = v[2];
 	}
 	inline void vectorf_push( std::vector<float> & v, const g3::Vector3f & p ) {
