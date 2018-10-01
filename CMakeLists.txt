@@ -72,6 +72,10 @@ set ( F3TBB_Include ${F3TBB_Root}/include )
 
 
 
+# Eigen?
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
+
 
 #add_subdirectory (GTEngine)
 add_subdirectory (src)

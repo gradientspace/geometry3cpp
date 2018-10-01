@@ -24,6 +24,8 @@ target_link_libraries ( geometry3 GTEngine )
 target_link_libraries ( geometry3 WmlCore )
 target_link_libraries ( geometry3 WmlMathematics )
 
+target_link_libraries ( geometry3 Eigen3::Eigen)
+
 
 source_group ( "util" FILES ${g3_util} )
 source_group ( "mesh" FILES ${g3_mesh} )
