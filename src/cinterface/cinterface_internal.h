@@ -89,7 +89,7 @@ struct MeshHandle
 		int k = 0;
 		if (packed != nullptr) {
 			for ( int vid = 0; vid < NV; ++vid ) {
-				Vector3f v = packed->GetPosition(vid);
+				Vector3f v = Vector3f(packed->GetPosition(vid));
 				buf[k++] = v[0]; buf[k++] = v[1]; buf[k++] = v[2];
 			}
 			return NV;

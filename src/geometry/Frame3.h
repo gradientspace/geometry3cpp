@@ -34,8 +34,8 @@ public:
 
 public:
 	//! create a reference frame at a specific origin
-	Frame3( const Vector3<Real> & Origin = Vector3<Real>::ZERO )
-		: Origin(Origin), InverseRotation(false) {}
+	Frame3( const Vector3<Real> & Origin = Vector3<Real>::Zero() )
+		: Origin(Origin), InverseRotation(Matrix3<Real>::Identity()) {}
 
 	//! create an orthogonal frame at an origin with a given z axis vector
 	Frame3( const Vector3<Real> & vOrigin, const Vector3<Real> & vNormalizedAxis, int nAxis = 2, bool bUseFastPerpVectors = true );
@@ -63,36 +63,33 @@ public:
 	void SetFrame(const Matrix3<Real> & matRotate);
 
 
-
-
-
 	//! get an axis of the frame
 	Vector3<Real> Axis(unsigned int nAxis) const {
-		return InverseRotation.GetRow(nAxis);
+		return InverseRotation.row(nAxis);
 	}
 
 	//! access the axes of the frame
 	Vector3<Real> X() const { 
-		return InverseRotation.GetRow( 0 ); }
+		return InverseRotation.row( 0 ); }
 	Vector3<Real> Y() const { 
-		return InverseRotation.GetRow( 1 ); }
+		return InverseRotation.row( 1 ); }
 	Vector3<Real> Z() const { 
-		return InverseRotation.GetRow( 2 ); }
+		return InverseRotation.row( 2 ); }
 
 	//! matrix that rotates canonical/unit XYZ axes to frame axes
 	Matrix3<Real> GetRotation() const {
-		return InverseRotation.Transpose();
+		return InverseRotation.transpose();
 	}
 
 
 
 	//! treat v as begin in frame-relative coords, transform to absolute/world coords
 	void SetToWorldCoords( Vector3<Real> & v ) const { 
-		v = Origin + InverseRotation.TransposeTimes(v);
+		v = Origin + InverseRotation.transpose() * v;
 	}
 	//! treat v as begin in frame-relative coords, transform to absolute/world coords
 	Vector3<Real> ToWorldCoords(const Vector3<Real> & v) const {
-		return Origin + InverseRotation.TransposeTimes(v);
+		return Origin + InverseRotation.transpose() * v;
 	}
 
 
@@ -108,9 +105,9 @@ public:
 
 	//! treat f as being relative to this frame, transform to absolute/world frame
 	Frame3<Real> ToWorldCoords( const Frame3<Real> & f, bool bPreserveOrigin = false ) const {	
-		Vector3<Real> x = InverseRotation.TransposeTimes(f.X());
-		Vector3<Real> y = InverseRotation.TransposeTimes(f.Y());
-		Vector3<Real> z = InverseRotation.TransposeTimes(f.Z());
+		Vector3<Real> x = InverseRotation.transpose() * f.X();
+		Vector3<Real> y = InverseRotation.transpose() * f.Y();
+		Vector3<Real> z = InverseRotation.transpose() * f.Z();
 		Frame3<Real> l( (bPreserveOrigin) ? f.Origin : ToWorldCoords(f.Origin) );
 		l.SetFrame(x,y,z);
 		return l;
@@ -149,6 +146,7 @@ public:
 					   Vector3<Real> & vRayHit, int nPlaneNormalAxis = 2 );
 	Vector3<Real> IntersectRay( const Vector3<Real> & vRayOrigin, const Vector3<Real> & vRayDirection,
 							    int nPlaneNormalAxis = 2 );
+
 };
 
 

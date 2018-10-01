@@ -242,9 +242,9 @@ void PackedMesh::EstimateNormals()
 	for (unsigned int k = 0; k < nTriangles; ++k) {
 		unsigned int nTri[3];
 		GetTriangle( k, nTri );
-		array3f_add( pNormals, nTri[0], vTriNormals[k] );
-		array3f_add( pNormals, nTri[1], vTriNormals[k] );
-		array3f_add( pNormals, nTri[2], vTriNormals[k] );
+		array3f_add( pNormals, nTri[0], vTriNormals[k].data() );
+		array3f_add( pNormals, nTri[1], vTriNormals[k].data() );
+		array3f_add( pNormals, nTri[2], vTriNormals[k].data() );
 	}
 
 	unsigned int nVertices = GetVertexCount();

@@ -139,7 +139,6 @@ namespace g3
 	}
 
 
-	// [RMS] throws errors?
 	inline Matrix2f d2f(const Matrix2d & v) {
 		return v.cast<float>();
 	}

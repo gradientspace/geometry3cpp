@@ -47,9 +47,9 @@ class PackedMeshVertexSource : public Wml::VertexSource<double>
 public:
 	const float * pVertices;
 	virtual ~PackedMeshVertexSource() = default;
-	virtual Vector3<double> operator[]( unsigned int i ) const {
+	virtual Wml::Vector3<double> operator[]( unsigned int i ) const {
 		i = 3*i;
-		return Vector3<double>( pVertices[i], pVertices[i+1], pVertices[i+2] );
+		return Wml::Vector3<double>( pVertices[i], pVertices[i+1], pVertices[i+2] );
 	}
 };
 
@@ -59,7 +59,7 @@ double g3::Volume( const IPackedMesh * pMesh )
 	PackedMeshVertexSource tmp;
 	tmp.pVertices = pMesh->GetPositionsBuffer();
 
-	double fMass; Vector3d vCoM; Matrix3d vMoI;
+	double fMass; Wml::Vector3d vCoM; Wml::Matrix3d vMoI;
 	Wml::ComputeMassProperties( &tmp, 
 								(int)pMesh->GetTriangleCount(), (const int *)pMesh->GetIndicesBuffer(), 
 								false, fMass, vCoM, vMoI );
@@ -69,12 +69,24 @@ double g3::Volume( const IPackedMesh * pMesh )
 
 Box3f g3::AxisBoundingBox( const IPackedMesh * pMesh )
 {
-	return Wml::ContAlignedBox( (int)pMesh->GetVertexCount(), (const Vector3f *)pMesh->GetPositionsBuffer() );
+	int NV = pMesh->GetVertexCount();
+	std::vector<Wml::Vector3f> pts;
+	pts.reserve(NV);
+	const float * p = pMesh->GetPositionsBuffer();
+	for (int k = 0; k < NV; ++k)
+		pts.push_back( Wml::Vector3f(p[3*k], p[3*k+1], p[3*k+2]) );
+	return Wml::ContAlignedBox(NV, &pts[0]);
 }
 
 Box3f g3::OrientedBoundingBox( const IPackedMesh * pMesh, bool bFast )
 {
-	return Wml::ContOrientedBox( (int)pMesh->GetVertexCount(), (const Vector3f *)pMesh->GetPositionsBuffer() );
+	int NV = pMesh->GetVertexCount();
+	std::vector<Wml::Vector3f> pts;
+	pts.reserve(NV);
+	const float * p = pMesh->GetPositionsBuffer();
+	for (int k = 0; k < NV; ++k)
+		pts.push_back(Wml::Vector3f(p[3 * k], p[3 * k + 1], p[3 * k + 2]));
+	return Wml::ContOrientedBox(NV, &pts[0]);
 }
 
 
