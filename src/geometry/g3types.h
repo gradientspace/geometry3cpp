@@ -8,6 +8,11 @@
 
 #include <Wm5Core.h>
 #include <Wm5Mathematics.h>
+
+#define EIGEN_MATRIXBASE_PLUGIN "eigen_MatrixBase_AddOns.h"
+#include <Eigen/Core>
+#include <Eigen/Geometry>   // required for MatrixBase.cross()  !!
+
 #include <memory>
 #include <limits>
 
@@ -44,38 +49,47 @@ namespace g3
 	typedef Wml::Math<double> Mathd;
 
 
-	template<typename T> using Vector2 = Wml::Vector2<T>;
-	typedef Wml::Vector2<float> Vector2f;
-	typedef Wml::Vector2<double> Vector2d;
+	template <typename T, int D> using Vector = Eigen::Matrix<T, D, 1>;
+	template <typename T, int A> using SquareMatrix = Eigen::Matrix<T, A, A>;
 
-	template<typename T> using Vector3 = Wml::Vector3<T>;
-	typedef Wml::Vector3<float> Vector3f;
-	typedef Wml::Vector3<double> Vector3d;
-	typedef Wml::Vector3<float> Color3f;
-	typedef Wml::Vector3<double> Color3d;
+	template<typename T> using Vector2 = Vector<T, 2>;
+	typedef Vector2<float> Vector2f;
+	typedef Vector2<double> Vector2d;
 
-	template<typename T> using Vector4 = Wml::Vector4<T>;
-	typedef Wml::Vector4<float> Vector4f;
-	typedef Wml::Vector4<double> Vector4d;
-	typedef Wml::Vector4<float> Color4f;
-	typedef Wml::Vector4<double> Color4d;
+	template<typename T> using Vector3 = Vector<T, 3>;
+	typedef Vector3<float> Vector3f;
+	typedef Vector3<double> Vector3d;
 
-	typedef Wml::IVector2 Vector2i;
+	template<typename T> using Vector4 = Vector<T, 4>;
+	typedef Vector4<float> Vector4f;
+	typedef Vector4<double> Vector4d;
+
+	template<typename T> using Matrix2 = SquareMatrix<T, 2>;
+	typedef Matrix2<float> Matrix2f;
+	typedef Matrix2<double> Matrix2d;
+
+	template<typename T> using Matrix3 = SquareMatrix<T, 3>;
+	typedef Matrix3<float> Matrix3f;
+	typedef Matrix3<double> Matrix3d;
+
+	template<typename T> using Matrix4 = SquareMatrix<T, 4>;
+	typedef Matrix4<float> Matrix4f;
+	typedef Matrix4<double> Matrix4d;
+
+	typedef Vector3<float> Color3f;
+	typedef Vector3<double> Color3d;
+	typedef Vector4<float> Color4f;
+	typedef Vector4<double> Color4d;
+
+	typedef Vector2<int> Vector2i;
 	typedef Wml::IVector3 Vector3i;
 	typedef Wml::IVector4 Vector4i;
+
+
+
 	typedef Wml::Color4b Color4b;
 
-	template<typename T> using Matrix2 = Wml::Matrix2<T>;
-	typedef Wml::Matrix2<float> Matrix2f;
-	typedef Wml::Matrix2<double> Matrix2d;
 
-	template<typename T> using Matrix3 = Wml::Matrix3<T>;
-	typedef Wml::Matrix3<float> Matrix3f;
-	typedef Wml::Matrix3<double> Matrix3d;
-
-	template<typename T> using Matrix4 = Wml::Matrix4<T>;
-	typedef Wml::Matrix4<float> Matrix4f;
-	typedef Wml::Matrix4<double> Matrix4d;
 
 	template<typename T> using AxisAlignedBox2 = Wml::AxisAlignedBox2<T>;
 	typedef Wml::AxisAlignedBox2<float> AxisAlignedBox2f;

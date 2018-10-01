@@ -20,7 +20,7 @@ public:
 	IPixelHitRadius * pHitThresh;
 
 	HitTestRay() { 
-		vOrigin = vDirection = g3::Vector3f::ZERO; pHitThresh = nullptr; 
+		vOrigin = vDirection = g3::Vector3f::Zero(); pHitThresh = nullptr; 
 	}
 	HitTestRay( const g3::Vector3f & o, const g3::Vector3f & d ) {
 		vOrigin = o; vDirection = d; pHitThresh = nullptr; 
