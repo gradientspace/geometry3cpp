@@ -45,6 +45,21 @@ public:
 
 protected:
     using IVector<2>::mTuple;
+
+
+// [geometry3]
+public:
+	using EVector2 = Eigen::Matrix<int, 2, 1>;
+	operator EVector2() const {
+		return Eigen::Map<EVector2>((int *)this);
+	}
+	IVector2(const EVector2 & vec) {
+		const int * p = vec.data();
+		mTuple[0] = p[0];
+		mTuple[1] = p[1];
+	}
+// [geometry3]
+
 };
 
 #include "Wm5IVector2.inl"

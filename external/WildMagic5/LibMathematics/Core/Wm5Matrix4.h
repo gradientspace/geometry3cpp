@@ -107,6 +107,34 @@ public:
 
 protected:
     using Table<4,4,Real>::mEntry;
+
+	// [geometry3]
+public:
+	using EMatrix4 = Eigen::Matrix<Real, 4, 4>;
+	operator EMatrix4() const {
+		return Eigen::Map<EMatrix4>((Real *)this);
+	}
+	Matrix4(const EMatrix4 & mat) {
+		const Real * p = mat.data();
+		mEntry[0] = p[0];
+		mEntry[1] = p[1];
+		mEntry[2] = p[2];
+		mEntry[3] = p[3];
+		mEntry[4] = p[4];
+		mEntry[5] = p[5];
+		mEntry[6] = p[6];
+		mEntry[7] = p[7];
+		mEntry[8] = p[8];
+		mEntry[9] = p[9];
+		mEntry[10] = p[10];
+		mEntry[11] = p[11];
+		mEntry[12] = p[12];
+		mEntry[13] = p[13];
+		mEntry[14] = p[14];
+		mEntry[15] = p[15];
+	}
+	// [geometry3]
+
 };
 
 // c * M

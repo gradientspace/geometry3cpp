@@ -45,6 +45,21 @@ public:
     // returns Dot(this,Cross(U,V))
     int TripleScalar (const IVector3& U, const IVector3& V) const;
 
+// [geometry3]
+public:
+	using EVector3 = Eigen::Matrix<int, 3, 1>;
+	operator EVector3() const {
+		return Eigen::Map<EVector3>((int *)this);
+	}
+	IVector3(const EVector3 & vec) {
+		const int * p = vec.data();
+		mTuple[0] = p[0];
+		mTuple[1] = p[1];
+		mTuple[2] = p[2];
+	}
+// [geometry3]
+
+
 protected:
     using IVector<3>::mTuple;
 };

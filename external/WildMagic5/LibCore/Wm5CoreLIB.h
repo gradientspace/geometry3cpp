@@ -223,4 +223,12 @@ typedef unsigned __int64    uint64_t;
     #define WM5_BUFFERIO_VALIDATE_OPERATION
 #endif
 
+
+// [geometry3]
+// Include eigen headers
+#include "../../../external/Eigen/Eigen/Core"
+#include "../../../external/Eigen/Eigen/Geometry"
+// [geometry3]
+
+
 #endif

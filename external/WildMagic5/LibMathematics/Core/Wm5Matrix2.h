@@ -126,6 +126,22 @@ public:
 
 protected:
     using Table<2,2,Real>::mEntry;
+
+// [geometry3]
+public:
+	using EMatrix2 = Eigen::Matrix<Real, 2, 2>;
+	operator EMatrix2() const {
+		return Eigen::Map<EMatrix2>((Real *)this);
+	}
+	Matrix2(const EMatrix2 & mat) {
+		const Real * p = mat.data();
+		mEntry[0] = p[0];
+		mEntry[1] = p[1];
+		mEntry[2] = p[2];
+		mEntry[3] = p[3];
+	}
+// [geometry3]
+
 };
 
 // c * M

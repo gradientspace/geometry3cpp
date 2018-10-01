@@ -32,6 +32,21 @@ public:
     // returns Dot(this,V)
     int Dot (const IVector4& vec) const;
 
+// [geometry3]
+public:
+	using EVector4 = Eigen::Matrix<int, 4, 1>;
+	operator EVector4() const {
+		return Eigen::Map<EVector4>((int *)this);
+	}
+	IVector4(const EVector4 & vec) {
+		const int * p = vec.data();
+		mTuple[0] = p[0];
+		mTuple[1] = p[1];
+		mTuple[2] = p[2];
+		mTuple[3] = p[3];
+	}
+// [geometry3]
+
 protected:
     using IVector<4>::mTuple;
 };

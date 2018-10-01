@@ -137,6 +137,21 @@ public:
 
 protected:
     using Tuple<2,Real>::mTuple;
+
+
+// [geometry3]
+public:
+	using EVector2 = Eigen::Matrix<Real, 2, 1>;
+	operator EVector2() const {
+		return Eigen::Map<EVector2>((Real *)this);
+	}
+	Vector2(const EVector2 & vec) {
+		const Real * p = vec.data();
+		mTuple[0] = p[0];
+		mTuple[1] = p[1];
+	}
+// [geometry3]
+
 };
 
 // Arithmetic operations.

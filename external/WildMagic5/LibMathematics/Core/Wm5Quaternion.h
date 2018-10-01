@@ -262,6 +262,22 @@ private:
 
     // Order of storage is (w,x,y,z).
     Real mTuple[4];
+
+
+// [geometry3]
+public:
+	using EQuaternion = Eigen::Quaternion<Real>;
+	operator EQuaternion() const {
+		return Eigen::Map<EQuaternion>(mTuple);
+	}
+	Quaternion(const EQuaternion & q) {
+		mTuple[0] = q.w();
+		mTuple[1] = q.x();
+		mTuple[2] = q.y();
+		mTuple[3] = q.z();
+	}
+// [geometry3]
+
 };
 
 #include "Wm5Quaternion.inl"

@@ -322,6 +322,28 @@ private:
 
 protected:
     using Table<3,3,Real>::mEntry;
+
+
+// [geometry3]
+public:
+	using EMatrix3 = Eigen::Matrix<Real, 3, 3>;
+	operator EMatrix3() const {
+		return Eigen::Map<EMatrix3>((Real *)this);
+	}
+	Matrix3(const EMatrix3 & mat) {
+		const Real * p = mat.data();
+		mEntry[0] = p[0];
+		mEntry[1] = p[1];
+		mEntry[2] = p[2];
+		mEntry[3] = p[3];
+		mEntry[4] = p[4];
+		mEntry[5] = p[5];
+		mEntry[6] = p[6];
+		mEntry[7] = p[7];
+		mEntry[8] = p[8];
+	}
+// [geometry3]
+
 };
 
 // c * M
