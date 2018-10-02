@@ -5,6 +5,7 @@
 #include <rcvector.h>
 #include <object_pool.h>
 #include <fixed_list.h>
+#include <XDMesh3.h>
 
 
 namespace g3 {
@@ -21,24 +22,7 @@ enum MeshConfig
 };
 typedef unsigned int MeshConfigFlags;
 
-enum MeshResult
-{
-    Ok = 0,
-	Failed_NotAVertex = 1,
-    Failed_NotATriangle = 2,
-    Failed_NotAnEdge = 3,
-    
-    Failed_BrokenTopology = 10,
-    
-    Failed_IsBoundaryEdge = 20,
-	Failed_FlippedEdgeExists = 21,
-    Failed_IsBowtieVertex = 22,
-	Failed_InvalidNeighbourhood = 23,		// these are all failures for CollapseEdge
-	Failed_FoundDuplicateTriangle = 24,
-	Failed_CollapseTetrahedron = 25,
-	Failed_CollapseTriangle = 26
-};
-    
+
 struct EdgeFlipInfo
 {
     EdgeID eID;
@@ -61,19 +45,19 @@ struct EdgeCollapseInfo
 };
 
 template<typename Real, template<typename> class VectorType = dvector >
-class DMesh3 : public IDynamicMesh<Real>
+class OldDMesh3 : public IDynamicMesh<Real>
 {
 public:
-	typedef DMesh3<Real, VectorType> DMesh3T;
+	typedef OldDMesh3<Real, VectorType> DMesh3T;
 	static Vector3<Real> InvalidVertex;
 	static Vector3i InvalidTriangle;
 	static Vector2i InvalidEdge;
 
-	virtual ~DMesh3();
+	virtual ~OldDMesh3();
 
-	DMesh3( MeshConfigFlags flags = 0 );
-	DMesh3(const DMesh3T & copy);
-	DMesh3(const DMesh3T && move);
+	OldDMesh3( MeshConfigFlags flags = 0 );
+	OldDMesh3(const DMesh3T & copy);
+	OldDMesh3(const DMesh3T && move);
 
 	const DMesh3T & operator=( const DMesh3T & copy );
 	const DMesh3T & operator=( const DMesh3T && moved );
@@ -254,70 +238,70 @@ public:
 };
 	
 	
-typedef DMesh3<float> DMesh3f;
-typedef DMesh3<double> DMesh3d;
+typedef OldDMesh3<float> OldDMesh3f;
+typedef OldDMesh3<double> OldDMesh3d;
 
 
 
 template<typename Real, template<typename> class VectorType>
-unsigned int DMesh3<Real, VectorType>::GetVertexCount( ) const
+unsigned int OldDMesh3<Real, VectorType>::GetVertexCount( ) const
 {
 	return m_vVertices.count();
 }
 template<typename Real, template<typename> class VectorType>
-unsigned int DMesh3<Real, VectorType>::GetTriangleCount( ) const
+unsigned int OldDMesh3<Real, VectorType>::GetTriangleCount( ) const
 {
 	return m_vTriangles.count();
 }
 template<typename Real, template<typename> class VectorType>
-unsigned int DMesh3<Real, VectorType>::GetEdgeCount( ) const
+unsigned int OldDMesh3<Real, VectorType>::GetEdgeCount( ) const
 {
 	return m_vEdges.count();
 }
 
 
 template<typename Real, template<typename> class VectorType>
-VertexID DMesh3<Real, VectorType>::GetMaxVertexID( ) const
+VertexID OldDMesh3<Real, VectorType>::GetMaxVertexID( ) const
 {
 	return m_vVertices.max_index();
 }
 template<typename Real, template<typename> class VectorType>
-TriangleID DMesh3<Real, VectorType>::GetMaxTriangleID( ) const
+TriangleID OldDMesh3<Real, VectorType>::GetMaxTriangleID( ) const
 {
 	return m_vTriangles.max_index();
 }
 template<typename Real, template<typename> class VectorType>
-EdgeID DMesh3<Real, VectorType>::GetMaxEdgeID( ) const
+EdgeID OldDMesh3<Real, VectorType>::GetMaxEdgeID( ) const
 {
 	return m_vEdges.max_index();
 }
 
 
 template<typename Real, template<typename> class VectorType>
-bool DMesh3<Real, VectorType>::IsVertex( VertexID vID ) const
+bool OldDMesh3<Real, VectorType>::IsVertex( VertexID vID ) const
 {
 	return m_vVertices.isValid(vID);
 }
 template<typename Real, template<typename> class VectorType>
-bool DMesh3<Real, VectorType>::IsTriangle( TriangleID tID ) const
+bool OldDMesh3<Real, VectorType>::IsTriangle( TriangleID tID ) const
 {
 	return m_vTriangles.isValid(tID);
 }
 template<typename Real, template<typename> class VectorType>
-bool DMesh3<Real, VectorType>::IsEdge( EdgeID eID ) const
+bool OldDMesh3<Real, VectorType>::IsEdge( EdgeID eID ) const
 {
 	return m_vEdges.isValid(eID);
 }
 
 
 template<typename Real, template<typename> class VectorType>
-const Vector3<Real> & DMesh3<Real, VectorType>::GetVertex( VertexID vID ) const
+const Vector3<Real> & OldDMesh3<Real, VectorType>::GetVertex( VertexID vID ) const
 {
 	return m_vVertices.isValid(vID) ? 
 		m_vVertices[vID].v : InvalidVertex;
 }
 template<typename Real, template<typename> class VectorType>
-void DMesh3<Real, VectorType>::SetVertex( VertexID vID, const Vector3<Real> & v )
+void OldDMesh3<Real, VectorType>::SetVertex( VertexID vID, const Vector3<Real> & v )
 {
 	if ( m_vVertices.isValid(vID) )
 		m_vVertices[vID].v = v;
@@ -326,21 +310,21 @@ void DMesh3<Real, VectorType>::SetVertex( VertexID vID, const Vector3<Real> & v 
 
 
 template<typename Real, template<typename> class VectorType>
-const Vector3i & DMesh3<Real, VectorType>::GetTriangle( TriangleID tID ) const
+const Vector3i & OldDMesh3<Real, VectorType>::GetTriangle( TriangleID tID ) const
 {
 	return m_vTriangles.isValid(tID) ? 
 		m_vTriangles[tID].tv : InvalidTriangle;
 }
 
 template<typename Real, template<typename> class VectorType>
-const Vector2i & DMesh3<Real, VectorType>::GetEdgeV( EdgeID eID ) const
+const Vector2i & OldDMesh3<Real, VectorType>::GetEdgeV( EdgeID eID ) const
 {
 	return m_vEdges.isValid(eID) ? 
 		m_vEdges[eID].v : InvalidEdge;
 }
 
 template<typename Real, template<typename> class VectorType>
-const Vector2i & DMesh3<Real, VectorType>::GetEdgeT( EdgeID eID ) const
+const Vector2i & OldDMesh3<Real, VectorType>::GetEdgeT( EdgeID eID ) const
 {
 	return m_vEdges.isValid(eID) ? 
 		m_vEdges[eID].t : InvalidEdge;
@@ -348,7 +332,7 @@ const Vector2i & DMesh3<Real, VectorType>::GetEdgeT( EdgeID eID ) const
 
 
 template<typename Real, template<typename> class VectorType>
-EdgeID DMesh3<Real, VectorType>::FindEdge( VertexID vA, VertexID vB ) const
+EdgeID OldDMesh3<Real, VectorType>::FindEdge( VertexID vA, VertexID vB ) const
 {
 	EdgeID eID;
 	const Edge * e = find_edge(vA, vB, eID );
@@ -356,7 +340,7 @@ EdgeID DMesh3<Real, VectorType>::FindEdge( VertexID vA, VertexID vB ) const
 }
 
 template<typename Real, template<typename> class VectorType>
-MeshResult DMesh3<Real, VectorType>::GetVtxEdges(VertexID vID,  std::vector<int> & v ) const
+MeshResult OldDMesh3<Real, VectorType>::GetVtxEdges(VertexID vID,  std::vector<int> & v ) const
 {
 	if (! IsVertex(vID) )
 		return MeshResult::Failed_NotAVertex;
@@ -365,7 +349,7 @@ MeshResult DMesh3<Real, VectorType>::GetVtxEdges(VertexID vID,  std::vector<int>
 }
 
 template<typename Real, template<typename> class VectorType>
-Vector3i DMesh3<Real, VectorType>::GetTriEdges(TriangleID tID) const
+Vector3i OldDMesh3<Real, VectorType>::GetTriEdges(TriangleID tID) const
 {
     if (! IsTriangle(tID) )
         return Vector3i(InvalidID, InvalidID, InvalidID);
@@ -374,51 +358,51 @@ Vector3i DMesh3<Real, VectorType>::GetTriEdges(TriangleID tID) const
 
 
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::vertex_iterator DMesh3<Real, VectorType>::begin_vertices()
+typename OldDMesh3<Real, VectorType>::vertex_iterator OldDMesh3<Real, VectorType>::begin_vertices()
 {
 	return m_vVertices.begin_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::vertex_iterator DMesh3<Real, VectorType>::end_vertices()
+typename OldDMesh3<Real, VectorType>::vertex_iterator OldDMesh3<Real, VectorType>::end_vertices()
 {
 	return m_vVertices.end_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::vertex_iterator_wrap DMesh3<Real, VectorType>::vertices()
+typename OldDMesh3<Real, VectorType>::vertex_iterator_wrap OldDMesh3<Real, VectorType>::vertices()
 {
 	return vertex_iterator_wrap(&m_vVertices);
 }
 
 
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::triangle_iterator DMesh3<Real, VectorType>::begin_triangles()
+typename OldDMesh3<Real, VectorType>::triangle_iterator OldDMesh3<Real, VectorType>::begin_triangles()
 {
 	return m_vTriangles.begin_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::triangle_iterator DMesh3<Real, VectorType>::end_triangles()
+typename OldDMesh3<Real, VectorType>::triangle_iterator OldDMesh3<Real, VectorType>::end_triangles()
 {
 	return m_vTriangles.end_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::triangle_iterator_wrap DMesh3<Real, VectorType>::triangles()
+typename OldDMesh3<Real, VectorType>::triangle_iterator_wrap OldDMesh3<Real, VectorType>::triangles()
 {
 	return triangle_iterator_wrap(&m_vTriangles);
 }
 
 
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::edge_iterator DMesh3<Real, VectorType>::begin_edges()
+typename OldDMesh3<Real, VectorType>::edge_iterator OldDMesh3<Real, VectorType>::begin_edges()
 {
 	return m_vEdges.begin_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::edge_iterator DMesh3<Real, VectorType>::end_edges()
+typename OldDMesh3<Real, VectorType>::edge_iterator OldDMesh3<Real, VectorType>::end_edges()
 {
 	return m_vEdges.end_indices();
 }
 template<typename Real, template<typename> class VectorType>
-typename DMesh3<Real, VectorType>::edge_iterator_wrap DMesh3<Real, VectorType>::edges()
+typename OldDMesh3<Real, VectorType>::edge_iterator_wrap OldDMesh3<Real, VectorType>::edges()
 {
 	return edge_iterator_wrap(&m_vEdges);
 }

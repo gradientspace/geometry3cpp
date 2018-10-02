@@ -8,7 +8,7 @@
 using namespace g3;
 
 #define DMESH_TEMPLATE template<typename Real, template<typename> class VectorType>
-#define DMESH_TYPE DMesh3<Real,VectorType>
+#define DMESH_TYPE OldDMesh3<Real,VectorType>
 
 
 DMESH_TEMPLATE Vector3<Real> DMESH_TYPE::InvalidVertex = Vector3<Real>( std::numeric_limits<Real>::max(), 0, 0  );
@@ -17,25 +17,25 @@ DMESH_TEMPLATE Vector2i DMESH_TYPE::InvalidEdge = Vector2i(InvalidID, InvalidID)
 
 
 DMESH_TEMPLATE
-DMESH_TYPE::~DMesh3()
+DMESH_TYPE::~OldDMesh3()
 {
 }
 
 DMESH_TEMPLATE
-DMESH_TYPE::DMesh3(MeshConfigFlags flags)
+DMESH_TYPE::OldDMesh3(MeshConfigFlags flags)
 {
 	m_flags = flags;
 }
 
 DMESH_TEMPLATE
-DMESH_TYPE::DMesh3( const DMesh3T & copy )
+DMESH_TYPE::OldDMesh3( const DMesh3T & copy )
 {
 	*this = copy;
 }
 
 
 DMESH_TEMPLATE
-DMESH_TYPE::DMesh3( const DMesh3T && moved )
+DMESH_TYPE::OldDMesh3( const DMesh3T && moved )
 {
 	*this = std::move(moved);
 }
@@ -100,7 +100,7 @@ void DMESH_TYPE::SetEnableVertexNormals( bool bEnable )
 		m_vNormals.resize( m_vVertices.max_index() );
 	} else if (bEnable == false && (m_flags & VertexNormals) != 0) {
 		m_flags ^= VertexNormals;
-		m_vNormals.clear(true);
+		m_vNormals.clear();
 	}
 }
 DMESH_TEMPLATE 
@@ -111,7 +111,7 @@ void DMESH_TYPE::SetEnableVertexColors( bool bEnable )
 		m_vColors.resize( m_vVertices.max_index() );
 	} else if (bEnable == false && (m_flags & VertexColors) != 0) {
 		m_flags ^= VertexColors;
-		m_vColors.clear(true);
+		m_vColors.clear();
 	}	
 }
 DMESH_TEMPLATE 
@@ -122,7 +122,7 @@ void DMESH_TYPE::SetEnableVertexUVs( bool bEnable )
 		m_vUVs.resize( m_vVertices.max_index() );
 	} else if (bEnable == false && (m_flags & VertexUVs) != 0) {
 		m_flags ^= VertexUVs;
-		m_vUVs.clear(true);
+		m_vUVs.clear();
 	}	
 }
 DMESH_TEMPLATE 
@@ -133,7 +133,7 @@ void DMESH_TYPE::SetEnableTriangleColors( bool bEnable )
 		m_vTriColors.resize( m_vTriangles.max_index() );
 	} else if (bEnable == false && (m_flags & TriangleColors) != 0) {
 		m_flags ^= TriangleColors;
-		m_vTriColors.clear(true);
+		m_vTriColors.clear();
 	}	
 }
 
@@ -144,11 +144,11 @@ VertexID DMESH_TYPE::AppendVertex( const Vector3<Real> & v )
 {
 	VertexID vID = m_vVertices.insert( { v, 0, 0 } );
 	if ( GetEnableVertexNormals() )
-		m_vNormals.insert( vID, Wml::Vector3f::UNIT_X );
+		m_vNormals.insertAt( Wml::Vector3f::UNIT_X, vID);
 	if ( GetEnableVertexColors() )
-		m_vColors.insert( vID, Colors::White );
+		m_vColors.insertAt( Colors::White, vID);
 	if ( GetEnableVertexUVs() )
-		m_vUVs.insert( vID, Wml::Vector2f::ZERO );
+		m_vUVs.insertAt( Wml::Vector2f::ZERO, vID);
 
 	if ( m_vVertexEdges.size() < vID )
 		m_vVertexEdges.resize(vID);
@@ -366,7 +366,7 @@ MeshResult DMESH_TYPE::SplitEdge( VertexID vA, VertexID vB, EdgeSplitInfo & spli
 	return SplitEdge(eab, split);
 }
 template<typename Real, template<typename> class VectorType>
-MeshResult DMesh3<Real, VectorType>::SplitEdge( EdgeID eab, EdgeSplitInfo & split )
+MeshResult OldDMesh3<Real, VectorType>::SplitEdge( EdgeID eab, EdgeSplitInfo & split )
 {
 	if (! IsEdge(eab) )
 		return MeshResult::Failed_NotAnEdge;
@@ -491,7 +491,7 @@ MeshResult DMesh3<Real, VectorType>::SplitEdge( EdgeID eab, EdgeSplitInfo & spli
 #endif
 
 template<typename Real, template<typename> class VectorType>
-MeshResult DMesh3<Real, VectorType>::CollapseEdge( VertexID vKeep, VertexID vRemove, EdgeCollapseInfo & collapse )
+MeshResult OldDMesh3<Real, VectorType>::CollapseEdge( VertexID vKeep, VertexID vRemove, EdgeCollapseInfo & collapse )
 {
 	if ( IsVertex(vKeep) == false || IsVertex(vRemove) == false )
 		return MeshResult::Failed_NotAnEdge;
@@ -1067,8 +1067,8 @@ bool DMESH_TYPE::CheckValidity(bool bAssert)
 //----------------------------------------------------------------------------
 namespace g3
 {
-template class DMesh3<float>;
-template class DMesh3<double>;
+template class OldDMesh3<float>;
+template class OldDMesh3<double>;
 
 }
 //----------------------------------------------------------------------------
