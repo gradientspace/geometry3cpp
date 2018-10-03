@@ -166,6 +166,13 @@ Vector3<Real> AxisAlignedBox3<Real>::Diagonal() const
 }
 
 template <typename Real>
+Vector3<Real> AxisAlignedBox3<Real>::Extents() const
+{
+	return Vector3<Real>( (Max[0] - Min[0])*(Real)0.5, (Max[1] - Min[1])*(Real)0.5, (Max[2] - Min[2])*(Real)0.5);
+}
+
+
+template <typename Real>
 Real AxisAlignedBox3<Real>::Volume() const
 {
 	return (Max[0] - Min[0]) * (Max[1] - Min[1]) * (Max[2] - Min[2]);

@@ -354,6 +354,9 @@
 #include "Wm5SingularValueDecompositionGTE.h"
 #include "Wm5SymmetricEigensolverGTE.h"
 
+// Objects1D
+#include "Wm5Interval1.h"
+
 // Objects2D
 #include "Wm5Arc2.h"
 #include "Wm5AxisAlignedBox2.h"

@@ -62,6 +62,7 @@ public:
 	Real MinDimension() const;
 	Vector3<Real> Center() const;
 	Vector3<Real> Diagonal() const;
+	Vector3<Real> Extents() const;
 	Real Volume() const;
 	void Contain(const Vector3<Real> & v);
 	void Contain(const AxisAlignedBox3<Real> & o);
