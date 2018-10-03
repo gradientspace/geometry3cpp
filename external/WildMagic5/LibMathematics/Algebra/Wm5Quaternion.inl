@@ -4,7 +4,7 @@
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 //
-// File Version: 5.0.1 (2011/03/27)
+// File Version: 5.0.2 (2015/05/21)
 
 //----------------------------------------------------------------------------
 template <typename Real>
@@ -802,7 +802,7 @@ void Quaternion<Real>::DecomposeTwistTimesSwing (const Vector3<Real>& v1,
     Quaternion& twist, Quaternion& swing)
 {
     Vector3<Real> v2 = Rotate(v1);
-    swing = Align(v1, v2);
+    swing.Align(v1, v2);
     twist = (*this)*swing.Conjugate();
 }
 //----------------------------------------------------------------------------
@@ -811,7 +811,7 @@ void Quaternion<Real>::DecomposeSwingTimesTwist (const Vector3<Real>& v1,
     Quaternion& swing, Quaternion& twist)
 {
     Vector3<Real> v2 = Rotate(v1);
-    swing = Align(v1, v2);
+    swing.Align(v1, v2);
     twist = swing.Conjugate()*(*this);
 }
 //----------------------------------------------------------------------------

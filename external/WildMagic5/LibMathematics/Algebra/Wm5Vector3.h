@@ -56,9 +56,9 @@ public:
     inline Real Length () const;
     inline Real SquaredLength () const;
     inline Real Dot (const Vector3& vec) const;
-    inline Real Normalize(const Real epsilon = Math<Real>::EPSILON);
-	inline Vector3 Normalized(const Real epsilon = Math<Real>::EPSILON) const;
-	inline bool IsNormalized(const Real epsilon = Math<Real>::EPSILON) const;
+    inline Real Normalize(const Real epsilon = 0);
+	inline Vector3 Normalized(const Real epsilon = 0) const;
+	inline bool IsNormalized(const Real epsilon = 0) const;
 	inline bool IsDegenerate(const Real epsilon = Math<Real>::EPSILON) const;
 
     // Compute the axis-aligned bounding box of the points.

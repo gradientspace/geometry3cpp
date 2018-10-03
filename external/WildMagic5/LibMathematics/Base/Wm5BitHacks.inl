@@ -4,17 +4,20 @@
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
 //
-// File Version: 5.0.0 (2010/01/01)
+// File Version: 5.0.1 (2017/10/12)
 
 //----------------------------------------------------------------------------
 inline int ScaledFloatToInt (float value, int power)
 {
     int result;
 
-    int shift = 150 - power - ((*(int*)(&value) >> 23) & 0xFF);
+    union { float fValue; int pattern; } u;
+    u.fValue = value;
+
+    int shift = 150 - power - ((u.pattern >> 23) & 0xFF);
     if (shift < 24)
     {
-        result = ((*(int*)(&value) & 0x007FFFFF) | 0x00800000) >> shift;
+        result = ((u.pattern & 0x007FFFFF) | 0x00800000) >> shift;
         if (result == (1 << power))
         {
             --result;

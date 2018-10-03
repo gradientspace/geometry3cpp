@@ -54,8 +54,8 @@ public:
     inline Real Length () const;
     inline Real SquaredLength () const;
     inline Real Dot (const Vector2& vec) const;
-    inline Real Normalize (const Real epsilon = Math<Real>::EPSILON);
-	inline Vector2 Normalized(const Real epsilon = Math<Real>::EPSILON) const;
+    inline Real Normalize (const Real epsilon = 0);
+	inline Vector2 Normalized(const Real epsilon = 0) const;
 
     // Returns (y,-x).
     inline Vector2 Perp () const;
