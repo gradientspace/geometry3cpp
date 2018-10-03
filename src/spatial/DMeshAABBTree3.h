@@ -62,8 +62,7 @@ public:
 				}
 			}
 
-		}
-		else {                                // internal node, either 1 or 2 child boxes
+		} else {                                // internal node, either 1 or 2 child boxes
 			int iChild1 = index_list[idx];
 			if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
 				iChild1 = (-iChild1) - 1;
@@ -71,8 +70,7 @@ public:
 				if (fChild1DistSqr <= fNearestSqr)
 					find_nearest_tri(iChild1, p, fNearestSqr, tID);
 
-			}
-			else {                            // 2 children, descend closest first
+			} else {                            // 2 children, descend closest first
 				iChild1 = iChild1 - 1;
 				int iChild2 = index_list[idx + 1] - 1;
 
@@ -84,8 +82,7 @@ public:
 						if (fChild2DistSqr < fNearestSqr)
 							find_nearest_tri(iChild2, p, fNearestSqr, tID);
 					}
-				}
-				else {
+				} else {
 					if (fChild2DistSqr < fNearestSqr) {
 						find_nearest_tri(iChild2, p, fNearestSqr, tID);
 						if (fChild1DistSqr < fNearestSqr)
@@ -257,8 +254,7 @@ protected:
 						sqrDistance = b0 * s + c;
 					}
 				}
-			}
-			else {  // region 1
+			} else {  // region 1
 				numer = a11 + b1 - a01 - b0;
 				if (numer <= 0) {
 					s = 0;
@@ -383,8 +379,7 @@ protected:
 			int child_box = nodes.index_list[i];
 			if (child_box < 0) {        // this is a triangles box
 				child_box = (-child_box) - 1;
-			}
-			else {
+			} else {
 				child_box += iBoxShift;
 			}
 			child_box = child_box + 1;
@@ -456,8 +451,7 @@ protected:
 			n0 = l;
 			n1 = iCount - n0;
 			gDevAssert(n0 >= 1 && n1 >= 1);
-		}
-		else {
+		} else {
 			// interval is near-empty, so no point trying to do sorting, just split half and half
 			n0 = iCount / 2;
 			n1 = iCount - n0;

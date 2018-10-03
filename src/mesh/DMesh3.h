@@ -78,19 +78,19 @@ struct NewVertexInfo
 		this->v = Vector3d::Zero(); n = c = Vector3f::Zero(); uv = Vector2f::Zero();
 		bHaveN = bHaveC = bHaveUV = false;
 	}
-	NewVertexInfo(Vector3d v) {
+	NewVertexInfo(const Vector3d & v) {
 		this->v = v; n = c = Vector3f::Zero(); uv = Vector2f::Zero();
 		bHaveN = bHaveC = bHaveUV = false;
 	}
-	NewVertexInfo(Vector3d v, Vector3f n) {
+	NewVertexInfo(const Vector3d & v, const Vector3f & n) {
 		this->v = v; this->n = n; c = Vector3f::Zero(); uv = Vector2f::Zero();
 		bHaveN = true; bHaveC = bHaveUV = false;
 	}
-	NewVertexInfo(Vector3d v, Vector3f n, Vector3f c) {
+	NewVertexInfo(const Vector3d & v, const Vector3f & n, const Vector3f & c) {
 		this->v = v; this->n = n; this->c = c; uv = Vector2f::Zero();
 		bHaveN = bHaveC = true; bHaveUV = false;
 	}
-	NewVertexInfo(Vector3d v, Vector3f n, Vector3f c, Vector2f uv) {
+	NewVertexInfo(const Vector3d & v, const Vector3f & n, const Vector3f & c, const Vector2f & uv) {
 		this->v = v; this->n = n; this->c = c; this->uv = uv;
 		bHaveN = bHaveC = bHaveUV = true;
 	}
@@ -642,7 +642,7 @@ public:
         return Vector3f((float)vertices[i], (float)vertices[i + 1], (float)vertices[i + 2]);
     }
 
-    void SetVertex(int vID, Vector3d vNewPos) {
+    void SetVertex(int vID, const Vector3d & vNewPos) {
 		gDevAssert(IsFinite(vNewPos));
         debug_check_is_vertex(vID);
 
@@ -770,11 +770,11 @@ public:
         gDevAssert(HasVertexNormals());
 
         int vi = 3 * vID;
-        Vector3d v = Vector3d(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
-        Vector3d normal = Vector3d(normals[vi], normals[vi + 1], normals[vi + 2]);
+        Vector3d v(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
+        Vector3d normal(normals[vi], normals[vi + 1], normals[vi + 2]);
         int eid = vertex_edges.First(vID);
         int ovi = 3 * edge_other_v(eid, vID);
-        Vector3d ov = Vector3d(vertices[ovi], vertices[ovi + 1], vertices[ovi + 2]);
+        Vector3d ov(vertices[ovi], vertices[ovi + 1], vertices[ovi + 2]);
         Vector3d edge = (ov - v);
         edge.normalize();
 
@@ -1007,9 +1007,9 @@ public:
         int a = 3 * triangles[ti + (nEdge % 3)];
         int b = 3 * triangles[ti + ((nEdge+1) % 3)];
         int c = 3 * triangles[ti + ((nEdge+2) % 3)];
-        Vector3d v1 = Vector3d(vertices[a], vertices[a + 1], vertices[a + 2]);
-        Vector3d v2 = Vector3d(vertices[b], vertices[b + 1], vertices[b + 2]);
-        Vector3d v3 = Vector3d(vertices[c], vertices[c + 1], vertices[c + 2]);
+        Vector3d v1(vertices[a], vertices[a + 1], vertices[a + 2]);
+        Vector3d v2(vertices[b], vertices[b + 1], vertices[b + 2]);
+        Vector3d v3(vertices[c], vertices[c + 1], vertices[c + 2]);
 
         Vector3d edge1 = v2 - v1;  edge1.normalize();
         Vector3d edge2 = v3 - v2;  edge2.normalize();
@@ -1030,11 +1030,11 @@ public:
     {
         int ti = 3 * tID;
         int ta = 3 * triangles[ti];
-        Vector3d a = Vector3d(vertices[ta] - p.x(), vertices[ta + 1] - p.y(), vertices[ta + 2] - p.z());
+        Vector3d a(vertices[ta] - p.x(), vertices[ta + 1] - p.y(), vertices[ta + 2] - p.z());
         int tb = 3 * triangles[ti + 1];
-        Vector3d b = Vector3d(vertices[tb] - p.x(), vertices[tb + 1] - p.y(), vertices[tb + 2] - p.z());
+        Vector3d b(vertices[tb] - p.x(), vertices[tb + 1] - p.y(), vertices[tb + 2] - p.z());
         int tc = 3 * triangles[ti + 2];
-        Vector3d c = Vector3d(vertices[tc] - p.x(), vertices[tc + 1] - p.y(), vertices[tc + 2] - p.z());
+        Vector3d c(vertices[tc] - p.x(), vertices[tc + 1] - p.y(), vertices[tc + 2] - p.z());
         // note: top and bottom are reversed here from formula in the paper? but it doesn't work otherwise...
         double la = a.norm(), lb = b.norm(), lc = c.norm();
         double bottom = (la * lb * lc) + a.dot(b) * lc + b.dot(c) * la + c.dot(a) * lb;
@@ -1052,11 +1052,11 @@ public:
     {
         int ti = 3 * tID;
         int ta = 3 * triangles[ti];
-        Vector3d a = Vector3d(vertices[ta], vertices[ta + 1], vertices[ta + 2]);
+        Vector3d a(vertices[ta], vertices[ta + 1], vertices[ta + 2]);
         int tb = 3 * triangles[ti + 1];
-        Vector3d b = Vector3d(vertices[tb], vertices[tb + 1], vertices[tb + 2]);
+        Vector3d b(vertices[tb], vertices[tb + 1], vertices[tb + 2]);
         int tc = 3 * triangles[ti + 2];
-        Vector3d c = Vector3d(vertices[tc], vertices[tc + 1], vertices[tc + 2]);
+        Vector3d c(vertices[tc], vertices[tc + 1], vertices[tc + 2]);
         if ( i == 0 )
             return VectorAngleR( (b-a).normalized(), (c-a).normalized());
         else if ( i == 1 )
