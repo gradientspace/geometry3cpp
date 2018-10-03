@@ -126,18 +126,34 @@ void g3::ComputePerpVectors( const Vector3<Real> & vNormal,  const Vector3<Real>
 
 
 template <class Real>
-Real g3::VectorAngle( const Vector2<Real> & v1, const Vector2<Real> & v2 )
+Real g3::VectorAngleR( const Vector2<Real> & v1, const Vector2<Real> & v2 )
 {
 	Real fDot = Clamp(v1.dot(v2), (Real)-1.0, (Real)1.0);
 	return (Real)acos(fDot);
 }
 
 template <class Real>
-Real g3::VectorAngle( const Vector3<Real> & v1, const Vector3<Real> & v2 )
+Real g3::VectorAngleR( const Vector3<Real> & v1, const Vector3<Real> & v2 )
 {
 	Real fDot = Clamp(v1.dot(v2), (Real)-1.0, (Real)1.0);
 	return (Real)acos(fDot);
 }
+
+
+template <class Real>
+Real g3::VectorAngleD(const Vector2<Real> & v1, const Vector2<Real> & v2)
+{
+	Real fDot = Clamp(v1.dot(v2), (Real)-1.0, (Real)1.0);
+	return (Real)acos(fDot) * Wml::Math<Real>::RAD_TO_DEG;
+}
+
+template <class Real>
+Real g3::VectorAngleD(const Vector3<Real> & v1, const Vector3<Real> & v2)
+{
+	Real fDot = Clamp(v1.dot(v2), (Real)-1.0, (Real)1.0);
+	return (Real)acos(fDot) * Wml::Math<Real>::RAD_TO_DEG;
+}
+
 
 template <class Real>
 Real g3::VectorCot( const Vector3<Real> & v1, const Vector3<Real> & v2 )
@@ -147,7 +163,16 @@ Real g3::VectorCot( const Vector3<Real> & v1, const Vector3<Real> & v2 )
 }
 
 
-
+template <class Real>
+Vector2<Real> g3::Lerp(const Vector2<Real> & v1, const Vector2<Real> & v2, Real t)
+{
+	return (1-t) * v1 + (t) * v2;
+}
+template <class Real>
+Vector3<Real> g3::Lerp(const Vector3<Real> & v1, const Vector3<Real> & v2, Real t)
+{
+	return (1-t) * v1 + (t) * v2;
+}
 
 
 template <class Real>
@@ -447,14 +472,23 @@ template g3External void ComputePerpVectors( const Vector3<double> & vIn, Vector
 template g3External void ComputePerpVectors( const Vector3<float> & vNormal,  const Vector3<float> & vEstX, Vector3<float> & vOut1, Vector3<float> & vOut2, bool bInputIsNormalized );
 template g3External void ComputePerpVectors( const Vector3<double> & vNormal,  const Vector3<double> & vEstX, Vector3<double> & vOut1, Vector3<double> & vOut2, bool bInputIsNormalized );
 
-template g3External float g3::VectorAngle( const Vector2<float> & v1, const Vector2<float> & v2 );
-template g3External double g3::VectorAngle( const Vector2<double> & v1, const Vector2<double> & v2 );
-template g3External float g3::VectorAngle( const Vector3<float> & v1, const Vector3<float> & v2 );
-template g3External double g3::VectorAngle( const Vector3<double> & v1, const Vector3<double> & v2 );
+template g3External float g3::VectorAngleR( const Vector2<float> & v1, const Vector2<float> & v2 );
+template g3External double g3::VectorAngleR( const Vector2<double> & v1, const Vector2<double> & v2 );
+template g3External float g3::VectorAngleR( const Vector3<float> & v1, const Vector3<float> & v2 );
+template g3External double g3::VectorAngleR( const Vector3<double> & v1, const Vector3<double> & v2 );
+
+template g3External float g3::VectorAngleD(const Vector2<float> & v1, const Vector2<float> & v2);
+template g3External double g3::VectorAngleD(const Vector2<double> & v1, const Vector2<double> & v2);
+template g3External float g3::VectorAngleD(const Vector3<float> & v1, const Vector3<float> & v2);
+template g3External double g3::VectorAngleD(const Vector3<double> & v1, const Vector3<double> & v2);
 
 template g3External float g3::VectorCot( const Vector3<float> & v1, const Vector3<float> & v2 );
 template g3External double g3::VectorCot( const Vector3<double> & v1, const Vector3<double> & v2 );
 
+template g3External Vector2<float> g3::Lerp(const Vector2<float> & v1, const Vector2<float> & v2, float t);
+template g3External Vector2<double> g3::Lerp(const Vector2<double> & v1, const Vector2<double> & v2, double t);
+template g3External Vector3<float> g3::Lerp(const Vector3<float> & v1, const Vector3<float> & v2, float t);
+template g3External Vector3<double> g3::Lerp(const Vector3<double> & v1, const Vector3<double> & v2, double t);
 
 
 template g3External Vector2<float> ToUV( const Vector3<float> & vec, int nUIndex, int nVIndex );

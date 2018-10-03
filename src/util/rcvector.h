@@ -55,7 +55,7 @@ public:
 		
 	virtual ~rcvector();
 
-	rcvector() : m_vFreeIndices(128) 
+	rcvector() : m_vFreeIndices() 
 	{ 
 		clear();
 		Type t; t.get_refcount(); t.set_refcount(1);

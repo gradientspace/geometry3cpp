@@ -45,12 +45,23 @@ namespace g3
 
 
 	template <class Real>
-	Real VectorAngle( const Vector2<Real> & v1, const Vector2<Real> & v2 );
+	Real VectorAngleR( const Vector2<Real> & v1, const Vector2<Real> & v2 );
 	template <class Real>
-	Real VectorAngle( const Vector3<Real> & v1, const Vector3<Real> & v2 );
+	Real VectorAngleR( const Vector3<Real> & v1, const Vector3<Real> & v2 );
+
+	template <class Real>
+	Real VectorAngleD(const Vector2<Real> & v1, const Vector2<Real> & v2);
+	template <class Real>
+	Real VectorAngleD(const Vector3<Real> & v1, const Vector3<Real> & v2);
 
 	template <class Real>
 	Real VectorCot( const Vector3<Real> & v1, const Vector3<Real> & v2 );
+
+
+	template <class Real>
+	Vector2<Real> Lerp(const Vector2<Real> & v1, const Vector2<Real> & v2, Real t);
+	template <class Real>
+	Vector3<Real> Lerp(const Vector3<Real> & v1, const Vector3<Real> & v2, Real t);
 
 	template <class Real>
 	void BarycentricCoords( const Vector3<Real> & vTriVtx1, 
@@ -125,6 +136,10 @@ namespace g3
 	 * inline utilities
 	 */
 
+	inline bool IsFinite(const Vector3d & v) {
+		return _finite(v.x()) && _finite(v.y()) && _finite(v.z());
+	}
+
 	inline Vector2f d2f(const Vector2d & v) { 
 		return Vector2f((float)v[0], (float)v[1]); 
 	}
@@ -195,6 +210,35 @@ namespace g3
 		v.push_back(p[0]); v.push_back(p[1]); v.push_back(p[2]);
 	}
 
+	template <typename DerivedA, typename DerivedB>
+	inline bool EpsilonEqual(const Eigen::MatrixBase<DerivedA> & m1, const Eigen::MatrixBase<DerivedB> & m2, double eps)
+	{
+		return (m1 - m2).cwiseAbs().maxCoeff() <= eps;
+	}
+
+	template <typename DerivedA, typename T>
+	inline bool Contains(const Eigen::MatrixBase<DerivedA> & m1, T value)
+	{
+		int n = (int)m1.array().size();
+		for (int k = 0; k < n; ++k) {
+			if (m1.array()[k] == value)
+				return true;
+		}
+		return false;
+	}
+
+	template<typename T>
+	inline bool Contains(const std::vector<T> & vec, T value) {
+		return std::find(vec.begin(), vec.end(), value) != vec.end();
+	}
+	template<typename T>
+	inline bool Remove(std::vector<T> & vec, T value) {
+		auto itr = std::find(vec.begin(), vec.end(), value);
+		if (itr == vec.end())
+			return false;
+		vec.erase(itr);
+		return true;
+	}
 
 }  // namespace g3
 

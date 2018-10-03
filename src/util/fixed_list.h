@@ -142,7 +142,9 @@ fixed_index_list<N>::fixed_index_list( const fixed_index_list<N> && moved )
 template<unsigned int N>
 const fixed_index_list<N> & fixed_index_list<N>::operator=( const fixed_index_list<N> && moved )
 {
-	m_data = std::move(moved.m_data);
+	for (int i = 0; i < N; ++i)
+		m_data[i] = moved.m_data[i];
+//	m_data = std::move(moved.m_data);
 	pFirst = moved.pFirst;
 	return *this;
 }

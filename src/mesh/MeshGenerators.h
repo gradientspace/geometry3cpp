@@ -1,27 +1,24 @@
 #pragma once
 
 #include <g3types.h>
-#include <GeometryInterfaces.h>
+#include <DMesh3.h>
 
 namespace g3 
 {
 
-template<typename Real>
 class SphereGenerator
 {
 public:
-	Frame3<Real> vFrame;
-	Real fRadius;
+	Frame3d vFrame;
+	double fRadius;
 	int nSlices;
 	int nStacks;
 
 	SphereGenerator();
 	virtual ~SphereGenerator() = default;
 
-	virtual void Generate( IDynamicMesh<Real> * pMesh );
+	virtual void Generate( DMesh3 * pMesh );
 };
-typedef SphereGenerator<float> SphereGeneratorf;
-typedef SphereGenerator<double> SphereGeneratord;
 
 
 }

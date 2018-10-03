@@ -15,7 +15,7 @@ inline bool same_pair_unordered( T a0, T a1, T b0, T b1 )
 
 // return index of a in tri_verts, or InvalidID if not found
 template<typename T, typename Vec>
-inline int find_tri_index( T a, Vec tri_verts )
+inline int find_tri_index( T a, const Vec & tri_verts )
 {
 	if ( tri_verts[0] == a ) return 0;
 	if ( tri_verts[1] == a ) return 1;
@@ -25,7 +25,7 @@ inline int find_tri_index( T a, Vec tri_verts )
 
 // return index of a in tri_verts, or InvalidID if not found
 template<typename T, typename Vec>
-inline int find_edge_index_in_tri( T a, T b, Vec & tri_verts )
+inline int find_edge_index_in_tri( T a, T b, const Vec & tri_verts )
 {
 	if ( same_pair_unordered(a, b, tri_verts[0], tri_verts[1]) ) return 0;
 	if ( same_pair_unordered(a, b, tri_verts[1], tri_verts[2]) ) return 1;
@@ -36,7 +36,7 @@ inline int find_edge_index_in_tri( T a, T b, Vec & tri_verts )
 
 // find sequence [a,b] in tri_verts (mod3) and return index of a, or InvalidID if not found
 template<typename T, typename Vec>
-inline int find_tri_ordered_edge( T a, T b, Vec tri_verts )
+inline int find_tri_ordered_edge( T a, T b, const Vec & tri_verts )
 {
 	if ( tri_verts[0] == a && tri_verts[1] == b )	return 0;
 	if ( tri_verts[1] == a && tri_verts[2] == b )	return 1;
@@ -46,7 +46,7 @@ inline int find_tri_ordered_edge( T a, T b, Vec tri_verts )
 
 // find sequence [a,b] in tri_verts (mod3) then return the third **value**, or InvalidID if not found
 template<typename T, typename Vec>
-inline int find_tri_other_vtx( T a, T b, Vec tri_verts )
+inline int find_tri_other_vtx( T a, T b, const Vec & tri_verts )
 {
     for (int j = 0; j < 3; ++j ) {
         if ( same_pair_unordered(a, b, tri_verts[j], tri_verts[(j+1)%3]) )
@@ -55,9 +55,21 @@ inline int find_tri_other_vtx( T a, T b, Vec tri_verts )
     return InvalidID;
 }
 
+template<typename T>
+inline int find_tri_other_vtx(T a, T b, const dvector<T> & tri_array, T ti)
+{
+	int i = 3 * ti;
+	for (int j = 0; j < 3; ++j) {
+		if (same_pair_unordered(a, b, tri_array[i + j], tri_array[i + ((j + 1) % 3)]))
+			return tri_array[i + ((j + 2) % 3)];
+	}
+	return InvalidID;
+}
+
+
 // find sequence [a,b] in tri_verts (mod3) then return the third **index**, or InvalidID if not found
 template<typename T, typename Vec>
-inline int find_tri_other_index( T a, T b, Vec tri_verts )
+inline int find_tri_other_index( T a, T b, const Vec & tri_verts )
 {
 	for (int j = 0; j < 3; ++j ) {
 		if ( same_pair_unordered(a, b, tri_verts[j], tri_verts[(j+1)%3]) )
@@ -65,10 +77,38 @@ inline int find_tri_other_index( T a, T b, Vec tri_verts )
 	}
 	return InvalidID;
 }
-   
+
+
+// Set [a,b] to order found in tri_verts (mod3). return true if we swapped.
+// Assumes that a and b are in tri_verts, if not the result is garbage!
+template<typename T, typename Vec>
+inline bool orient_tri_edge(T & a, T & b, const Vec & tri_verts)
+{
+	if (a == tri_verts[0]) {
+		if (tri_verts[2] == b) {
+			T x = a; a = b; b = x;
+			return true;
+		}
+	}
+	else if (a == tri_verts[1]) {
+		if (tri_verts[0] == b) {
+			T x = a; a = b; b = x;
+			return true;
+		}
+	}
+	else if (a == tri_verts[2]) {
+		if (tri_verts[1] == b) {
+			T x = a; a = b; b = x;
+			return true;
+		}
+	}
+	return false;
+}
+
+
 // set [a,b] to order found in tri_verts (mod3), and return third **value**, or InvalidID if not found
 template<typename T, typename Vec>
-inline int orient_tri_edge_and_find_other_vtx( T & a, T & b, Vec tri_verts )
+inline int orient_tri_edge_and_find_other_vtx( T & a, T & b, const Vec & tri_verts )
 {
     for ( int j = 0; j < 3; ++j ) {
         if ( same_pair_unordered(a, b, tri_verts[j], tri_verts[(j+1)%3]) ) {

@@ -6,12 +6,12 @@
  *   are only included further down...
  */
 
-#include <Wm5Core.h>
-#include <Wm5Mathematics.h>
-
 #define EIGEN_MATRIXBASE_PLUGIN "eigen_MatrixBase_AddOns.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>   // required for MatrixBase.cross()  !!
+
+#include <Wm5Core.h>
+#include <Wm5Mathematics.h>
 
 #include <memory>
 #include <limits>
@@ -82,9 +82,12 @@ namespace g3
 	typedef Vector4<double> Color4d;
 
 	typedef Vector2<int> Vector2i;
-	typedef Wml::IVector3 Vector3i;
-	typedef Wml::IVector4 Vector4i;
+	typedef Vector3<int> Vector3i;
+	typedef Vector4<int> Vector4i;
 
+	typedef Vector2<int> Index2i;
+	typedef Vector3<int> Index3i;
+	typedef Vector4<int> Index4i;
 
 
 	typedef Wml::Color4b Color4b;

@@ -94,7 +94,8 @@ template<class Type>
 Type * object_pool<Type>::allocate()
 {
 	if ( m_free.empty( )) {
-		return m_store.push_back();
+		m_store.push_back(Type());
+		return & m_store.back();
 	}  else {
 		Type * pObject = m_free.back();
 		*pObject = Type();
@@ -122,7 +123,7 @@ template<class Type>
 void object_pool<Type>::free_pool()
 {
 	m_free.clear();
-	m_store.clear(true);
+	m_store.clear();
 }
 
 

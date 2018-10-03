@@ -3,18 +3,18 @@
 
 using namespace g3;
 
-template<typename Real>
-MeshSubdivider<Real>::MeshSubdivider()
+
+MeshSubdivider::MeshSubdivider()
 {
 }
 
-template<typename Real>
-void MeshSubdivider<Real>::Split1to4( DMesh3<Real> & mesh )
+
+void MeshSubdivider::Split1to4( DMesh3 & mesh )
 {
-	EdgeID nMaxEdge = mesh.GetMaxEdgeID();
+	EdgeID nMaxEdge = mesh.MaxEdgeID();
 	std::vector<VertexID> vNewV(nMaxEdge, InvalidID);
 
-	for (auto eid : mesh.edges())
+	for (auto eid : mesh.EdgeIndices())
 		vNewV[eid] = MarkerID1;
 
 	// [TODO] can we do this without saving triangles? Could we process each triangle
@@ -23,7 +23,7 @@ void MeshSubdivider<Real>::Split1to4( DMesh3<Real> & mesh )
 
 	// save triangle edges & verts (do we need both?)
 	static const Vector3i InvalidTri(-1,-1,-1);
-	TriangleID nMaxInitialTri = mesh.GetMaxTriangleID();
+	TriangleID nMaxInitialTri = mesh.MaxTriangleID();
 	std::vector<Vector3i> vTris(nMaxInitialTri);
 	std::vector<Vector3i> vTriEdges(nMaxInitialTri);
 	for (int k = 0; k < nMaxInitialTri; ++k) {
@@ -37,9 +37,9 @@ void MeshSubdivider<Real>::Split1to4( DMesh3<Real> & mesh )
 	}
 
 	// split all edges
-	for (auto eid : mesh.edges()) {
+	for (auto eid : mesh.EdgeIndices()) {
 		if (vNewV[eid] == MarkerID1) {
-			EdgeSplitInfo info;
+			DMesh3::EdgeSplitInfo info;
 			auto eResult = mesh.SplitEdge(eid, info);
 			vNewV[eid] = (eResult == MeshResult::Ok) ? info.vNew : InvalidID;
 		}
@@ -59,7 +59,7 @@ void MeshSubdivider<Real>::Split1to4( DMesh3<Real> & mesh )
 				VertexID o = vTris[k][(j+1)%3];
 				VertexID c = vNewV[vTriEdges[k][(j+2)%3]];
 				if ( c != InvalidID && mesh.FindEdge( o, c ) ) {
-					EdgeFlipInfo info;
+					DMesh3::EdgeFlipInfo info;
 					auto eResult = mesh.FlipEdge( o, c, info );
 				}
 			}
@@ -67,9 +67,3 @@ void MeshSubdivider<Real>::Split1to4( DMesh3<Real> & mesh )
 	}
 }
 
-
-namespace g3
-{
-template class MeshSubdivider<float>;
-template class MeshSubdivider<double>;
-}

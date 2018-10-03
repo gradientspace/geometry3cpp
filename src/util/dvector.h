@@ -1,27 +1,17 @@
 #pragma once
 
 #include <vector>
+#include <array>
 
 namespace g3
 {
 
 
 template<class Type>
-class dvector_segment {
-public:
-	Type * pData;
-	size_t nSize;
-	size_t nCur;
-	dvector_segment() { pData = NULL; }
-	~dvector_segment() { }
-};
-
-
-template<class Type>
 class dvector
 {
 public:
-	dvector(unsigned int nSegmentSize = 0);
+	dvector();
 	dvector(const dvector & copy);
 	dvector(dvector && moved);
 	virtual ~dvector();
@@ -29,19 +19,23 @@ public:
 	const dvector & operator=( const dvector & copy );
 	const dvector & operator=( dvector && moved );
 
-	inline void clear( bool bFreeSegments = false );
+	inline void clear();
+	inline void fill(const Type & value);
 	inline void resize( size_t nCount );
 	inline void resize( size_t nCount, const Type & init_value );
 
 	inline bool empty() const;
 	inline size_t size() const;
+	inline size_t length() const;
+	inline int block_size() const;
+	inline size_t byte_count() const;
 
+	inline void add(const Type & data);
 	inline void push_back( const Type & data );
-	inline Type * push_back();
 	inline void push_back( const dvector<Type> & data );
 	inline void pop_back();
 
-	inline void insert( unsigned int nIndex, const Type & data );
+	inline void insertAt(const Type & data, unsigned int nIndex);
 
 	inline Type & front();
 	inline const Type & front() const;
@@ -54,8 +48,6 @@ public:
 	// apply f() to each member sequentially
 	template<typename Func>
 	void apply(const Func & f);
-
-	// TODO insert function that handles resizing?
 
 	class iterator {
 	public:
@@ -76,12 +68,16 @@ public:
 	iterator end();
 
 protected:
-	unsigned int m_nSegmentSize;
-	unsigned int m_nCurSeg;
+	// [RMS] nBlockSize must be a power-of-two, so we can use bit-shifts in operator[]
+	static constexpr int nBlockSize = 2048;   // (1 << 11)
+	static constexpr int nShiftBits = 11;
+	static constexpr int nBlockIndexBitmask = 2047;   // low 11 bits
 
-	std::vector< dvector_segment<Type> > m_vSegments;
-
-	Type * allocate_element();
+	unsigned int iCurBlock;
+	unsigned int iCurBlockUsed;
+	
+	using BlockType = std::array<Type, nBlockSize>;
+	std::vector<BlockType> Blocks;
 
 	friend class iterator;
 
@@ -103,23 +99,15 @@ std::ostream& operator<<( std::ostream& os, const dvector<Type> & dv )
 
 
 template <class Type>
-dvector<Type>::dvector(unsigned int nSegmentSize)
+dvector<Type>::dvector()
 {
-	if ( nSegmentSize == 0 )
-		m_nSegmentSize = (1 << 16) / sizeof(Type);		// 64k
-	else
-		m_nSegmentSize = nSegmentSize;
-
-	m_vSegments.resize(1);
-	m_vSegments[0].pData = new Type[ m_nSegmentSize ];
-	m_vSegments[0].nSize = m_nSegmentSize;
-	m_vSegments[0].nCur = 0;
-
-	m_nCurSeg = 0;
+	iCurBlock = 0;
+	iCurBlockUsed = 0;
+	Blocks.push_back(BlockType());
 }
 
 template <class Type>
-dvector<Type>::dvector(const dvector<Type> & copy) : dvector(0)
+dvector<Type>::dvector(const dvector<Type> & copy) : dvector()
 {
 	*this = copy;
 }
@@ -134,36 +122,14 @@ dvector<Type>::dvector( dvector && moved )
 template <class Type>
 dvector<Type>::~dvector()
 {
-	size_t nCount = m_vSegments.size();
-	for (unsigned int i = 0; i < nCount; ++i)
-		delete [] m_vSegments[i].pData;
 }
 
 template <class Type>
 const dvector<Type> & dvector<Type>::operator=( const dvector & copy )
 {
-	// if segments are the same size, we don't need to re-allocate any existing ones  (woot!)
-	bool bSegmentsChanged = (m_nSegmentSize != copy.m_nSegmentSize);
-	m_nSegmentSize = copy.m_nSegmentSize;
-	if ( bSegmentsChanged )
-		clear(true);
-
-	m_nCurSeg = copy.m_nCurSeg;
-
-	// allocate memory (or discard exisiting memory) for segments
-	resize( copy.size() );
-
-	// copy segment contents
-	size_t nSegs = copy.m_vSegments.size();
-	for ( unsigned int k = 0; k < nSegs; ++k ) {
-#ifdef WIN32	
-		memcpy_s( m_vSegments[k].pData, m_nSegmentSize*sizeof(Type), copy.m_vSegments[k].pData, m_nSegmentSize*sizeof(Type) );
-#else
-		memcpy( m_vSegments[k].pData, copy.m_vSegments[k].pData, m_nSegmentSize*sizeof(Type) );
-#endif
-		m_vSegments[k].nSize = m_nSegmentSize;
-		m_vSegments[k].nCur = copy.m_vSegments[k].nCur;
-	}
+	Blocks = copy.Blocks;
+	iCurBlock = copy.iCurBlock;
+	iCurBlockUsed = copy.iCurBlockUsed;
 	return *this;
 }
 
@@ -172,67 +138,65 @@ const dvector<Type> & dvector<Type>::operator=( const dvector & copy )
 template <class Type>
 const dvector<Type> & dvector<Type>::operator=( dvector && moved)
 {
-	clear(this);
-	this->m_nSegmentSize = moved.m_nSegmentSize;
-	this->m_nCurSeg = moved.m_nCurSeg;
-	m_vSegments = std::move(moved.m_vSegments);
-	moved.m_nCurSeg = 0;
+	Blocks = std::move(moved.Blocks);
+	iCurBlock = moved.iCurBlock;
+	iCurBlockUsed = moved.iCurBlockUsed;
 	return *this;
 }
 
 
 template <class Type>
-void dvector<Type>::clear( bool bFreeSegments )
+void dvector<Type>::clear()
 {
-	size_t nCount = m_vSegments.size();
-	for (unsigned int i = 0; i < nCount; ++i) 
-		m_vSegments[i].nCur = 0;
-
-	if (bFreeSegments) {
-		for (unsigned int i = 0; i < nCount; ++i)
-			delete [] m_vSegments[i].pData;
-
-		m_vSegments.resize(1);
-		m_vSegments[0].pData = new Type[ m_nSegmentSize ];
-		m_vSegments[0].nSize = m_nSegmentSize;
-		m_vSegments[0].nCur = 0;
-	}
-
-	m_nCurSeg = 0;
+	Blocks.clear();
+	iCurBlock = 0;
+	iCurBlockUsed = 0;
+	Blocks.push_back(BlockType());
 }
+
+
+template <class Type>
+void dvector<Type>::fill(const Type & value)
+{
+	size_t nCount = Blocks.size();
+	for (unsigned int i = 0; i < nCount; ++i)
+		Blocks[i].fill(value);
+}
+
+
 
 
 template <class Type>
 void dvector<Type>::resize( size_t nCount )
 {
+	if (length() == nCount)
+		return;
+
 	// figure out how many segments we need
-	unsigned int nNumSegs = 1 + (unsigned int)nCount / m_nSegmentSize;
+	int nNumSegs = 1 + (int)nCount/nBlockSize;
 
 	// figure out how many are currently allocated...
-	size_t nCurCount = m_vSegments.size();
+	size_t nCurCount = Blocks.size();
 
 	// erase extra segments memory
-	for ( unsigned int i = nNumSegs; i < nCurCount; ++i )
-		delete [] m_vSegments[i].pData;
+	// [RMS] not necessary right? std::array will deallocate?
+	//for (int i = nNumSegs; i < nCurCount; ++i)
+	//	Blocks[i] = null;
 
 	// resize to right number of segments
-	m_vSegments.resize(nNumSegs);
-
-	// allocate new segments
-	for (unsigned int i = (unsigned int)nCurCount; i < nNumSegs; ++i) {
-		m_vSegments[i].pData = new Type[ m_nSegmentSize ];
-		m_vSegments[i].nSize = m_nSegmentSize;
-		m_vSegments[i].nCur = 0;
+	if (nNumSegs >= Blocks.size()) {
+		// allocate new segments
+		for (int i = (int)nCurCount; i < nNumSegs; ++i) {
+			Blocks.push_back(BlockType());
+		}
+	} else {
+		//Blocks.RemoveRange(nNumSegs, Blocks.Count - nNumSegs);
+		Blocks.resize(nNumSegs);
 	}
 
-	// mark full segments as used
-	for (unsigned int i = 0; i < nNumSegs-1; ++i)
-		m_vSegments[i].nCur = m_nSegmentSize;
-
 	// mark last segment
-	m_vSegments[nNumSegs-1].nCur = nCount - (nNumSegs-1)*m_nSegmentSize;
-
-	m_nCurSeg = nNumSegs-1;
+	iCurBlockUsed = (unsigned int)(nCount - (nNumSegs-1)*nBlockSize);
+	iCurBlock = nNumSegs-1;
 }
 
 
@@ -242,52 +206,63 @@ void dvector<Type>::resize( size_t nCount, const Type & init_value )
 	size_t nCurSize = size();
 	resize(nCount);
 	for ( size_t nIndex = nCurSize; nIndex < nCount; ++nIndex ) 
-		m_vSegments[ nIndex / m_nSegmentSize ].pData[ nIndex % m_nSegmentSize ] = init_value;
+		Blocks[ nIndex / m_nSegmentSize ].pData[ nIndex % m_nSegmentSize ] = init_value;
 }
+
+
 
 template <class Type>
 bool dvector<Type>::empty() const
 {
-	return ! ( m_nCurSeg > 0 || m_vSegments[0].nCur > 0 );
+	return iCurBlock == 0 && iCurBlockUsed == 0;
 }
 
 template <class Type>
 size_t dvector<Type>::size() const
 {
-	return m_nCurSeg*m_nSegmentSize + m_vSegments[m_nCurSeg].nCur;
+	return iCurBlock * nBlockSize + iCurBlockUsed;
 }
+template <class Type>
+size_t dvector<Type>::length() const
+{
+	return iCurBlock * nBlockSize + iCurBlockUsed;
+}
+
+template <class Type>
+int dvector<Type>::block_size() const
+{
+	return nBlockSize;
+}
+
+template <class Type>
+size_t dvector<Type>::byte_count() const
+{
+	int nb = (int)Blocks.size();
+	return (nb == 0) ? 0 : nb * nBlockSize * sizeof(Type);
+}
+
 
 
 template <class Type>
-Type * dvector<Type>::allocate_element()
+void dvector<Type>::add(const Type & value)
 {
-	dvector_segment<Type> & seg = m_vSegments[m_nCurSeg];
-	if ( seg.nCur == seg.nSize ) {
-		if ( m_nCurSeg == m_vSegments.size() - 1 ) {
-			m_vSegments.resize( m_vSegments.size() + 1 );
-			dvector_segment<Type> & newSeg = m_vSegments.back();
-			newSeg.pData = new Type[ m_nSegmentSize ];
-			newSeg.nSize = m_nSegmentSize;
-			newSeg.nCur = 0;
-		}
-		m_nCurSeg++;
+	if (iCurBlockUsed == nBlockSize) {
+		if (iCurBlock == Blocks.size() - 1)
+			Blocks.push_back(BlockType());
+		iCurBlock++;
+		iCurBlockUsed = 0;
 	}
-	dvector_segment<Type> & returnSeg = m_vSegments[m_nCurSeg];
-	return & returnSeg.pData[ returnSeg.nCur++ ];
+	Blocks[iCurBlock][iCurBlockUsed] = value;
+	iCurBlockUsed++;
 }
+
 
 template <class Type>
 void dvector<Type>::push_back( const Type & data )
 {
-	Type * pNewElem = allocate_element();
-	*pNewElem = data;
+	add(data);
 }
 
-template <class Type>
-Type * dvector<Type>::push_back()
-{
-	return allocate_element();
-}
 
 template <class Type>
 void dvector<Type>::push_back( const dvector<Type> & data )
@@ -301,66 +276,69 @@ void dvector<Type>::push_back( const dvector<Type> & data )
 template <class Type>
 void dvector<Type>::pop_back()
 {
-	if (m_vSegments[m_nCurSeg].nCur > 0)
-		m_vSegments[m_nCurSeg].nCur--;
-	if (m_vSegments[m_nCurSeg].nCur == 0 && m_nCurSeg > 0 ) 
-		m_nCurSeg--;
-	// else we are in seg 0 and nCur is 0, so we have nothing to pop!
-}
-
-
-template <class Type>
-void dvector<Type>::insert( unsigned int nIndex, const Type & data )
-{
-	//TODO this does not make sense if nIndex < size !!!
-	abort();
-
-	size_t s = size();
-	if (nIndex == s) {
-		push_back( data );
-	} else {
-		resize( nIndex+1 );
-		(*this)[nIndex] = data;
+	if (iCurBlockUsed > 0)
+		iCurBlockUsed--;
+	if (iCurBlockUsed == 0 && iCurBlock > 0) {
+		iCurBlock--;
+		iCurBlockUsed = nBlockSize;
+		// remove block ??
 	}
 }
 
 
 template <class Type>
+void dvector<Type>::insertAt(const Type & data, unsigned int nIndex)
+{
+	size_t s = size();
+	if (nIndex == s) {
+		push_back(data);
+	}
+	else if (nIndex > s) {
+		resize(nIndex);
+		push_back(data);
+	}
+	else {
+		(*this)[nIndex] = data;
+	}
+}
+
+
+
+
+template <class Type>
 Type & dvector<Type>::front()
 {
-	return m_vSegments[0].pData[0];
+	return Blocks[0][0];
 }
 template <class Type>
 const Type & dvector<Type>::front() const
 {
-	return m_vSegments[0].pData[0];
+	return Blocks[0][0];
 }
 
 template <class Type>
 Type & dvector<Type>::back()
 {
-	auto & seg = m_vSegments[m_nCurSeg];
-	return seg.pData[ seg.nCur-1 ];
+	return Blocks[iCurBlock][iCurBlockUsed - 1];
 }
 template <class Type>
 const Type & dvector<Type>::back() const
 {
-	auto & seg = m_vSegments[m_nCurSeg];
-	return seg.pData[ seg.nCur-1 ];
+	return Blocks[iCurBlock][iCurBlockUsed - 1];
 }
 
 
 
 template <class Type>
-Type & dvector<Type>::operator[]( unsigned int nIndex )
+Type & dvector<Type>::operator[]( unsigned int i )
 {
-	return m_vSegments[ nIndex / m_nSegmentSize ].pData[ nIndex % m_nSegmentSize ];
+	return Blocks[i >> nShiftBits][i & nBlockIndexBitmask];
 }
 
 template <class Type>
-const Type & dvector<Type>::operator[]( unsigned int nIndex ) const
+const Type & dvector<Type>::operator[]( unsigned int i ) const
 {
-	return m_vSegments[ nIndex / m_nSegmentSize ].pData[ nIndex % m_nSegmentSize ];
+	return Blocks[i >> nShiftBits][i & nBlockIndexBitmask];
 }
 
 
@@ -369,10 +347,14 @@ template<typename Type>
 template<typename Func>
 void dvector<Type>::apply( const Func & f )
 {
-	for (auto & seg : m_vSegments) {
-		for (unsigned int i = 0; i < seg.nCur; ++i) 
-			f( seg.pData[i] );
+	for (int bi = 0; bi < iCurBlock; ++bi) {
+		auto block = Blocks[bi];
+		for (int k = 0; k < nBlockSize; ++k)
+			applyF(block[k], k);
 	}
+	auto lastblock = Blocks[iCurBlock];
+	for (int k = 0; k < iCurBlockUsed; ++k)
+		applyF(lastblock[k], k);
 }
 
 

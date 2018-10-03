@@ -5,16 +5,13 @@
 namespace g3 
 {
 
-template<typename Real>
-class MeshSubdivider
+class g3External MeshSubdivider
 {
 public:
-	typedef DMesh3<Real, g3::dvector> MeshType;
-
 	MeshSubdivider();
 	virtual ~MeshSubdivider() = default;
 
-	virtual void Split1to4( DMesh3<Real> & mesh );
+	virtual void Split1to4( DMesh3 & mesh );
 
 	// [TODO]
 	//    - version of 1-4 that takes ROI
@@ -24,8 +21,6 @@ public:
 	//    - reprojection (here?)
 
 };
-typedef MeshSubdivider<float> MeshSubdividerf;
-typedef MeshSubdivider<double> MeshSubdividerd;
 
 
 }

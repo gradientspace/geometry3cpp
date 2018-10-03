@@ -8,7 +8,7 @@ CMeshHandle create_packed_mesh() {
 }
 
 CMeshHandle create_dynamic_mesh() {
-	return new MeshHandle(new DMesh3<double>());
+	return new MeshHandle(new DMesh3());
 }
 
 void release_mesh( CMeshHandle handle ) {

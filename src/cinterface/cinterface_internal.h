@@ -17,7 +17,7 @@ struct MeshHandle
 	int valid_token;
 
 	PackedMesh * packed;
-	DMesh3<double> * dynamic;
+	DMesh3 * dynamic;
 
 	MeshHandle( PackedMesh * pPacked ) {
 		packed = pPacked;
@@ -25,7 +25,7 @@ struct MeshHandle
 		valid_token = VALID;
 	}
 
-	MeshHandle( DMesh3<double> * pDynamic ) {
+	MeshHandle( DMesh3 * pDynamic ) {
 		packed = nullptr;
 		dynamic = pDynamic;
 		valid_token = VALID;
@@ -51,7 +51,7 @@ struct MeshHandle
 		if ( is_valid() && packed != nullptr )
 			return packed->GetVertexCount();
 		else if ( is_valid() && dynamic != nullptr )
-			return dynamic->GetVertexCount();
+			return dynamic->VertexCount();
 		return -1;
 	}
 
@@ -59,7 +59,7 @@ struct MeshHandle
 		if ( is_valid() && packed != nullptr )
 			return packed->GetTriangleCount();
 		else if ( is_valid() && dynamic != nullptr )
-			return dynamic->GetTriangleCount();
+			return dynamic->TriangleCount();
 		return -1;
 	}
 
