@@ -1,5 +1,5 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
@@ -8,6 +8,7 @@
 #pragma once
 
 #include <GTEngineDEF.h>
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <initializer_list>
@@ -193,25 +194,22 @@ Vector<N, Real>::Vector(std::array<Real, N> const& values)
     mTuple(values)
 {
 }
-
 template <int N, typename Real>
 Vector<N, Real>::Vector(std::initializer_list<Real> values)
 {
-    int i = 0;
-    for (auto value : values)
+    int const numValues = static_cast<int>(values.size());
+    if (N == numValues)
     {
-        if (i < N)
-        {
-            mTuple[i++] = value;
-        }
-        else
-        {
-            break;
-        }
+        std::copy(values.begin(), values.end(), mTuple.begin());
     }
-    for (/**/; i < N; ++i)
+    else if (N > numValues)
     {
-        mTuple[i] = (Real)0;
+        std::copy(values.begin(), values.end(), mTuple.begin());
+        std::fill(mTuple.begin() + numValues, mTuple.end(), (Real)0);
+    }
+    else // N < numValues
+    {
+        std::copy(values.begin(), values.begin() + N, mTuple.begin());
     }
 }
 

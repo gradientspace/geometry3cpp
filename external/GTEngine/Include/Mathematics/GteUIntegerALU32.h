@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/07/04)
 
 #pragma once
 
@@ -117,22 +117,20 @@ bool UIntegerALU32<UInteger>::operator< (UInteger const& number) const
         while (block0 >= 0 && block1 >= 0)
         {
             // Shift the bits in the leading blocks to the high-order bit.
-            uint32_t value0 =
-                GTE_GET_LO_U64(n0shift << (32 - numBlockBits0));
-            uint32_t value1 =
-                GTE_GET_LO_U64(n1shift << (32 - numBlockBits1));
+            uint32_t value0 = (uint32_t)((n0shift << (32 - numBlockBits0)) & 0x00000000FFFFFFFFull);
+            uint32_t value1 = (uint32_t)((n1shift << (32 - numBlockBits1)) & 0x00000000FFFFFFFFull);
 
             // Shift bits in the next block (if any) to fill the current
             // block.
             if (--block0 >= 0)
             {
                 n0shift = bits[block0];
-                value0 |= GTE_GET_LO_U64(n0shift >> numBlockBits0);
+                value0 |= (uint32_t)((n0shift >> numBlockBits0) & 0x00000000FFFFFFFFull);
             }
             if (--block1 >= 0)
             {
                 n1shift = nBits[block1];
-                value1 |= GTE_GET_LO_U64(n1shift >> numBlockBits1);
+                value1 |= (uint32_t)((n1shift >> numBlockBits1) & 0x00000000FFFFFFFFull);
             }
             if (value0 < value1)
             {
@@ -202,7 +200,7 @@ void UIntegerALU32<UInteger>::Add(UInteger const& n0, UInteger const& n1)
     for (i = 0; i < numElements.first; ++i)
     {
         sum = u0[i] + (u1[i] + carry);
-        bits[i] = GTE_GET_LO_U64(sum);
+        bits[i] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
         carry = (sum >> 32);
     }
 
@@ -213,12 +211,12 @@ void UIntegerALU32<UInteger>::Add(UInteger const& n0, UInteger const& n1)
         for (/**/; i < numElements.second; ++i)
         {
             sum = u0[i] + carry;
-            bits[i] = GTE_GET_LO_U64(sum);
+            bits[i] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
             carry = (sum >> 32);
         }
         if (carry > 0)
         {
-            bits[i] = GTE_GET_LO_U64(carry);
+            bits[i] = (uint32_t)(carry & 0x00000000FFFFFFFFull);
         }
     }
     else
@@ -275,7 +273,7 @@ void UIntegerALU32<UInteger>::Sub(UInteger const& n0, UInteger const& n1)
     for (i = 0; i < numElements0; ++i)
     {
         sum = n2Bits[i] + carry;
-        n2Bits[i] = GTE_GET_LO_U64(sum);
+        n2Bits[i] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
         carry = (sum >> 32);
     }
 
@@ -289,7 +287,7 @@ void UIntegerALU32<UInteger>::Sub(UInteger const& n0, UInteger const& n1)
     for (i = 0, carry = 0; i < numElements0; ++i)
     {
         sum = n2Bits[i] + (n0Bits[i] + carry);
-        bits[i] = GTE_GET_LO_U64(sum);
+        bits[i] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
         carry = (sum >> 32);
     }
 
@@ -342,12 +340,12 @@ void UIntegerALU32<UInteger>::Mul(UInteger const& n0, UInteger const& n1)
     for (i1 = 0; i1 < numElements1; ++i1)
     {
         term = block0 * n1Bits[i1] + carry;
-        bits[i1] = GTE_GET_LO_U64(term);
+        bits[i1] = (uint32_t)(term & 0x00000000FFFFFFFFull);
         carry = (term >> 32);
     }
     if (i1 < numElements)
     {
-        bits[i1] = GTE_GET_LO_U64(carry);
+        bits[i1] = (uint32_t)(carry & 0x00000000FFFFFFFFull);
     }
 
     for (i0 = 1; i0 < numElements0; ++i0)
@@ -358,12 +356,12 @@ void UIntegerALU32<UInteger>::Mul(UInteger const& n0, UInteger const& n1)
         for (i1 = 0, i2 = i0; i1 < numElements1; ++i1, ++i2)
         {
             term = block0 * n1Bits[i1] + carry;
-            pBits[i2] = GTE_GET_LO_U64(term);
+            pBits[i2] = (uint32_t)(term & 0x00000000FFFFFFFFull);
             carry = (term >> 32);
         }
         if (i2 < numElements)
         {
-            pBits[i2] = GTE_GET_LO_U64(carry);
+            pBits[i2] = (uint32_t)(carry & 0x00000000FFFFFFFFull);
         }
 
         // Add p to the accumulator v.
@@ -371,13 +369,13 @@ void UIntegerALU32<UInteger>::Mul(UInteger const& n0, UInteger const& n1)
         for (i1 = 0, i2 = i0; i1 < numElements1; ++i1, ++i2)
         {
             sum = pBits[i2] + (bits[i2] + carry);
-            bits[i2] = GTE_GET_LO_U64(sum);
+            bits[i2] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
             carry = (sum >> 32);
         }
         if (i2 < numElements)
         {
             sum = pBits[i2] + carry;
-            bits[i2] = GTE_GET_LO_U64(sum);
+            bits[i2] = (uint32_t)(sum & 0x00000000FFFFFFFFull);
         }
     }
 

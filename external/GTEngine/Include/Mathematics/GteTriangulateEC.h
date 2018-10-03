@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/02/17)
 
 #pragma once
 
@@ -1115,14 +1115,14 @@ template <typename InputType, typename ComputeType>
 TriangulateEC<InputType, ComputeType>::Vertex::Vertex()
     :
     index(-1),
-    isConvex(false),
-    isEar(false),
     vPrev(-1),
     vNext(-1),
     sPrev(-1),
     sNext(-1),
     ePrev(-1),
-    eNext(-1)
+    eNext(-1),
+    isConvex(false),
+    isEar(false)
 {
 }
 

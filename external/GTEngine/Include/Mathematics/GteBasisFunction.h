@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.1 (2016/08/25)
+// File Version: 3.0.2 (2018/04/28)
 
 #pragma once
 
@@ -64,11 +64,9 @@ public:
     // The curve is 'open' when m[0] = m[s-1] = d+1; otherwise, it is
     // 'floating'.  An open curve is uniform when the knots t[d] through
     // t[n] are equally spaced; that is, t[i+1] - t[i] are a common value
-    // for d <= i <= n-1.  By implication, s = n-d-1 and m[j] = 1 for
+    // for d <= i <= n-1.  By implication, s = n-d+1 and m[j] = 1 for
     // 1 <= j <= s-2.  An open curve that does not satisfy these conditions
-    // is said to be nonuniform.  The aforementioned book does not define
-    // subclasses of 'floating' curves, but it is convenient to have a finer
-    // classification.  Let us say that a floating curve is uniform when
+    // is said to be nonuniform.  A floating curve is uniform when
     // m[j] = 1 for 0 <= j <= s-1 and t[i+1] - t[i] are a common value for
     // 0 <= i <= k-2; otherwise, the floating curve is nonuniform.
     //

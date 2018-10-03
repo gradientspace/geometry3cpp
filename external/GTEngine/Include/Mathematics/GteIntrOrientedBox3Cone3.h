@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/07/25)
 
 #pragma once
 
@@ -39,7 +39,7 @@ public:
         // No additional information to compute.
     };
 
-    Result operator()(OrientedBox<3, Real> const& box, Cone<3, Real>& cone);
+    Result operator()(OrientedBox<3, Real> const& box, Cone<3, Real> const& cone);
 };
 
 // Template alias for convenience.
@@ -51,7 +51,7 @@ TIQuery<Real, OrientedBox<3, Real>, Cone<3, Real>>;
 template <typename Real>
 typename TIQuery<Real, OrientedBox<3, Real>, Cone<3, Real>>::Result
     TIQuery<Real, OrientedBox<3, Real>, Cone<3, Real>>::operator()(
-    OrientedBox<3, Real> const& box, Cone<3, Real>& cone)
+    OrientedBox<3, Real> const& box, Cone<3, Real> const& cone)
 {
     Result result;
 

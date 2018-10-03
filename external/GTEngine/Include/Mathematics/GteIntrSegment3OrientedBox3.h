@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/05/23)
 
 #pragma once
 
@@ -109,8 +109,19 @@ FIQuery<Real, Segment3<Real>, OrientedBox3<Real>>::operator()(
     this->DoQuery(segOrigin, segDirection, segExtent, box.extent, result);
     for (int i = 0; i < result.numPoints; ++i)
     {
-        result.point[i] = segOrigin + result.lineParameter[i] * segDirection;
+        // Compute the intersection point in the oriented-box coordinate
+        // system.
+        Vector3<Real> c = segOrigin + result.lineParameter[i] * segDirection;
+
+        // Transform the intersection point to the original coordinate
+        // system.
+        result.point[i] = box.center;
+        for (int j = 0; j < 3; ++j)
+        {
+            result.point[i] += c[j] * box.axis[j];
+        }
     }
+
     return result;
 }
 

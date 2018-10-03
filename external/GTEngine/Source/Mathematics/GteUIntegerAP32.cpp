@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/07/04)
 
 #include <GTEnginePCH.h>
 #include <Mathematics/GteBitHacks.h>
@@ -56,10 +56,10 @@ UIntegerAP32::UIntegerAP32(uint64_t number)
         number >>= last;
         mNumBits = first - last + 1;
         mBits.resize(1 + (mNumBits - 1) / 32);
-        mBits[0] = GTE_GET_LO_U64(number);
+        mBits[0] = (uint32_t)(number & 0x00000000FFFFFFFFull);
         if (mBits.size() > 1)
         {
-            mBits[1] = GTE_GET_HI_U64(number);
+            mBits[1] = (uint32_t)((number >> 32) & 0x00000000FFFFFFFFull);
         }
     }
     else

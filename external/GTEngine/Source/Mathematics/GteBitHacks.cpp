@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.1 (2017/02/06)
+// File Version: 3.0.3 (2017/10/22)
 
 #include <GTEnginePCH.h>
 #include <Mathematics/GteBitHacks.h>
@@ -82,25 +82,25 @@ int32_t GetLeadingBit(int32_t value)
 
 int32_t GetLeadingBit(uint64_t value)
 {
-    uint32_t v1 = GTE_GET_HI_U64(value);
+    uint32_t v1 = (uint32_t)((value >> 32) & 0x00000000FFFFFFFFull);
     if (v1 != 0)
     {
         return GetLeadingBit(v1) + 32;
     }
 
-    uint32_t v0 = GTE_GET_LO_U64(value);
+    uint32_t v0 = (uint32_t)(value & 0x00000000FFFFFFFFull);
     return GetLeadingBit(v0);
 }
 
 int32_t GetLeadingBit(int64_t value)
 {
-    int32_t v1 = GTE_GET_HI_I64(value);
+    int32_t v1 = (int32_t)((value >> 32) & 0x00000000FFFFFFFFull);
     if (v1 != 0)
     {
         return GetLeadingBit(v1) + 32;
     }
 
-    int32_t v0 = GTE_GET_LO_I64(value);
+    int32_t v0 = (int32_t)(value & 0x00000000FFFFFFFFull);
     return GetLeadingBit(v0);
 }
 
@@ -120,26 +120,34 @@ int32_t GetTrailingBit(int32_t value)
 
 int32_t GetTrailingBit(uint64_t value)
 {
-    uint32_t v0 = GTE_GET_LO_U64(value);
+    uint32_t v0 = (uint32_t)(value & 0x00000000FFFFFFFFull);
     if (v0 != 0)
     {
         return GetTrailingBit(v0);
     }
 
-    uint32_t v1 = GTE_GET_HI_U64(value);
-    return GetTrailingBit(v1) + 32;
+    uint32_t v1 = (uint32_t)((value >> 32) & 0x00000000FFFFFFFFull);
+    if (v1 != 0)
+    {
+        return GetTrailingBit(v1) + 32;
+    }
+    return 0;
 }
 
 int32_t GetTrailingBit(int64_t value)
 {
-    int32_t v0 = GTE_GET_LO_I64(value);
+    int32_t v0 = (int32_t)(value & 0x00000000FFFFFFFFull);
     if (v0 != 0)
     {
         return GetTrailingBit(v0);
     }
 
-    int32_t v1 = GTE_GET_HI_I64(value);
-    return GetTrailingBit(v1) + 32;
+    int32_t v1 = (int32_t)((value >> 32) & 0x00000000FFFFFFFFull);
+    if (v1 != 0)
+    {
+        return GetTrailingBit(v1) + 32;
+    }
+    return 0;
 }
 
 uint64_t RoundUpToPowerOfTwo(uint32_t value)
@@ -162,7 +170,7 @@ uint64_t RoundUpToPowerOfTwo(uint32_t value)
     }
     else
     {
-        return GTE_U64(1);
+        return 1ull;
     }
 }
 

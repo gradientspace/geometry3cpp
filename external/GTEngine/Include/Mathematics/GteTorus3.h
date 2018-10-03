@@ -1,29 +1,46 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/05/19)
 
 #pragma once
 
 #include <Mathematics/GteVector3.h>
 
-// The torus has center C with plane of symmetry containing C and having
-// directions D0 and D1.  The axis of symmetry is the line containing C
-// and having direction N (the plane normal).  The radius from the center
-// of the torus is r0 (outer radius) and the radius of the tube of the
-// torus is r1 (inner radius).  It must be that r0 >= r1.  A point X may
-// be written as X = C + y0*D0 + y1*D1 + y2*N, where matrix [U V N] is
-// orthonormal and has determinant 1.  Thus, y0 = Dot(D0,X-C),
-// y1 = Dot(D1,X-C), and y2 = Dot(N,X-C).  The implicit form is
-//      [|X-C|^2 - (r0^2 + r1^2)]^2 + 4*r0^2*((Dot(N,X-C))^2 - r1^2) = 0
-// Note that D0 and D1 are not present in the equation, which is to be
+// A torus with origin (0,0,0), outer radius r0 and inner radius r1 (with
+// (r0 >= r1) is defined implicitly as follows.  The point P0 = (x,y,z) is on
+// the torus. Its projection onto the xy-plane is P1 = (x,y,0).  The circular
+// cross section of the torus that contains the projection has radius r0 and
+// center P2 = r0*(x,y,0)/sqrt(x^2+y^2).  The points triangle <P0,P1,P2> is a
+// right triangle with right angle at P1.  The hypotenuse <P0,P2> has length
+// r1, leg <P1,P2> has length z and leg <P0,P1> has length |r0 - sqrt(x^2+y^2)|.
+// The Pythagorean theorem says z^2 + |r0 - sqrt(x^2+y^2)|^2 = r1^2.  This can
+// be algebraically manipulated to
+//   (x^2 + y^2 + z^2 + r0^2 - r1^2)^2 - 4 * r0^2 * (x^2 + y^2) = 0
+//
+// A parametric form is
+//   x = (r0 + r1 * cos(v)) * cos(u)
+//   y = (r0 + r1 * cos(v)) * sin(u)
+//   z = r1 * sin(v)
+// for u in [0,2*pi) and v in [0,2*pi).
+//
+// Generally, let the torus center be C with plane of symmetry containing C
+// and having directions D0 and D1.  The axis of symmetry is the line
+// containing C and having direction N (the plane normal).  The radius from
+// the center of the torus is r0 and the radius of the tube of the torus is
+// r1.  A point P may be written as P = C + x*D0 + y*D1 + z*N, where matrix
+// [D0 D1 N] is orthonormal and has determinant 1.  Thus, x = Dot(D0,P-C),
+// y = Dot(D1,P-C) and z = Dot(N,P-C).  The implicit form is
+//      [|P-C|^2 + r0^2 - r1^2]^2 - 4*r0^2*[|P-C|^2 - (Dot(N,P-C))^2] = 0
+// Observe that D0 and D1 are not present in the equation, which is to be
 // expected by the symmetry.  The parametric form is
-//      X(u,v) = (r0 + r1*cos(v))*(cos(u)*D0 + sin(u)*D1) + r1*sin(v)*N
-// for -pi <= u < pi, -pi <= v < pi.  The member 'center' is C, 'direction0'
-// is D0, 'direction1' is D1, 'normal' is N, 'radius0' is r0, and 'radius1'
-// is r1.
+//      P(u,v) = C + (r0 + r1*cos(v))*(cos(u)*D0 + sin(u)*D1) + r1*sin(v)*N
+// for u in [0,2*pi) and v in [0,2*pi).
+//
+// In the class Torus3, the members are 'center' C, 'direction0' D0,
+// 'direction1' D1, 'normal' N, 'radius0' r0 and 'radius1' r1.
 
 namespace gte
 {
@@ -46,8 +63,7 @@ public:
     // position and first-order derivatives, pass in maxOrder of 1, and so on.
     // The output 'values' are ordered as: position X; first-order derivatives
     // dX/du, dX/dv; second-order derivatives d2X/du2, d2X/dudv, d2X/dv2.
-    void Evaluate(Real u, Real v, unsigned int maxOrder,
-        Vector3<Real> values[6]) const;
+    void Evaluate(Real u, Real v, unsigned int maxOrder, Vector3<Real> values[6]) const;
 
     // Reverse lookup of parameters from position.
     void GetParameters(Vector3<Real> const& X, Real& u, Real& v) const;
@@ -133,8 +149,7 @@ void Torus3<Real>::Evaluate(Real u, Real v, unsigned int maxOrder,
 }
 
 template <typename Real>
-void Torus3<Real>::GetParameters(Vector3<Real> const& X, Real& u, Real& v)
-const
+void Torus3<Real>::GetParameters(Vector3<Real> const& X, Real& u, Real& v) const
 {
     Vector3<Real> delta = X - center;
     Real dot0 = Dot(direction0, delta);  // (r0 + r1*cos(v))*cos(u)
@@ -235,6 +250,5 @@ bool Torus3<Real>::operator>=(Torus3 const& torus) const
 {
     return !operator<(torus);
 }
-
 
 }

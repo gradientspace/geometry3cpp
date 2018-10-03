@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/11/26)
 
 #pragma once
 
@@ -52,7 +52,7 @@ public:
     // Member access.
     inline int GetSign() const;
     inline BSNumber<UIntegerType> const& GetNumerator() const;
-    inline BSNumber<UIntegerType> const& GetDenomator() const;
+    inline BSNumber<UIntegerType> const& GetDenominator() const;
 
     // Comparisons.
     bool operator==(BSRational const& r) const;
@@ -310,7 +310,7 @@ BSNumber<UIntegerType> const& BSRational<UIntegerType>::GetNumerator() const
 }
 
 template <typename UIntegerType> inline
-BSNumber<UIntegerType> const& BSRational<UIntegerType>::GetDenomator() const
+BSNumber<UIntegerType> const& BSRational<UIntegerType>::GetDenominator() const
 {
     return mDenominator;
 }

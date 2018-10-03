@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.10 (2016/11/27)
+// File Version: 3.0.20 (2018/07/31)
 
 #pragma once
 
@@ -28,6 +28,7 @@
 
 // Approximation
 #include <Mathematics/GteApprCircle2.h>
+#include <Mathematics/GteApprCone3.h>
 #include <Mathematics/GteApprCylinder3.h>
 #include <Mathematics/GteApprEllipseByArcs.h>
 #include <Mathematics/GteApprEllipse2.h>
@@ -51,9 +52,9 @@
 #include <Mathematics/GteApprQuadratic3.h>
 #include <Mathematics/GteApprQuery.h>
 #include <Mathematics/GteApprSphere3.h>
+#include <Mathematics/GteApprTorus3.h>
 
 // Arithmetic
-#include <Mathematics/GteArithmetic.h>
 #include <Mathematics/GteBitHacks.h>
 #include <Mathematics/GteBSNumber.h>
 #include <Mathematics/GteBSPrecision.h>
@@ -83,6 +84,7 @@
 #include <Mathematics/GteMinimumVolumeBox3.h>
 #include <Mathematics/GteMinimumVolumeSphere3.h>
 #include <Mathematics/GteNearestNeighborQuery.h>
+#include <Mathematics/GteOBBTreeOfPoints.h>
 #include <Mathematics/GtePlanarMesh.h>
 #include <Mathematics/GtePrimalQuery2.h>
 #include <Mathematics/GtePrimalQuery3.h>
@@ -99,6 +101,7 @@
 #include <Mathematics/GteVertexCollapseMesh.h>
 
 // Containment
+#include <Mathematics/GteContAlignedBox.h>
 #include <Mathematics/GteContCapsule3.h>
 #include <Mathematics/GteContCircle2.h>
 #include <Mathematics/GteContCylinder3.h>
@@ -198,6 +201,9 @@
 #include <Mathematics/GteExp2Estimate.h>
 #include <Mathematics/GteExpEstimate.h>
 #include <Mathematics/GteFunctions.h>
+#include <Mathematics/GteFunctionsBSNumber.h>
+#include <Mathematics/GteFunctionsBSRational.h>
+#include <Mathematics/GteFunctionsIEEEBinary16.h>
 #include <Mathematics/GteInvSqrtEstimate.h>
 #include <Mathematics/GteLog2Estimate.h>
 #include <Mathematics/GteLogEstimate.h>
@@ -240,6 +246,7 @@
 #include <Mathematics/GteIntpAkimaUniform3.h>
 #include <Mathematics/GteIntpBicubic2.h>
 #include <Mathematics/GteIntpBilinear2.h>
+#include <Mathematics/GteIntpBSplineUniform.h>
 #include <Mathematics/GteIntpLinearNonuniform2.h>
 #include <Mathematics/GteIntpLinearNonuniform3.h>
 #include <Mathematics/GteIntpQuadraticNonuniform2.h>
@@ -253,6 +260,7 @@
 // Intersection
 #include <Mathematics/GteFIQuery.h>
 #include <Mathematics/GteIntrAlignedBox2AlignedBox2.h>
+#include <Mathematics/GteIntrAlignedBox2Circle2.h>
 #include <Mathematics/GteIntrAlignedBox2OrientedBox2.h>
 #include <Mathematics/GteIntrAlignedBox3AlignedBox3.h>
 #include <Mathematics/GteIntrAlignedBox3Cone3.h>
@@ -348,10 +356,13 @@
 #include <Mathematics/GteTIQuery.h>
 
 // NumericalMethods
+#include <Mathematics/GteCholeskyDecomposition.h>
 #include <Mathematics/GteCubicRootsQR.h>
+#include <Mathematics/GteGaussNewtonMinimizer.h>
 #include <Mathematics/GteGaussianElimination.h>
 #include <Mathematics/GteIntegration.h>
 #include <Mathematics/GteLCPSolver.h>
+#include <Mathematics/GteLevenbergMarquardtMinimizer.h>
 #include <Mathematics/GteLinearSystem.h>
 #include <Mathematics/GteMinimize1.h>
 #include <Mathematics/GteMinimizeN.h>
@@ -374,7 +385,8 @@
 #include <Mathematics/GteProjection.h>
 
 // SIMD
-#if defined(__MSWINDOWS__)
+#if defined(__MSWINDOWS__) && !defined(MINGW)
 #include <Mathematics/MSW/GteIntelSSE.h>
+#include <Mathematics/MSW/GteCPUQueryInstructions.h>
 #endif
 

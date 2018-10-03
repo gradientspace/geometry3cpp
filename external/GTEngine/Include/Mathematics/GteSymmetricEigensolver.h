@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/08/20)
 
 #pragma once
 
@@ -129,16 +129,19 @@ public:
 
     // Accumulate the Householder reflections and Givens rotations to produce
     // the orthogonal matrix Q for which Q^T*A*Q = D.  The input
-    // 'eigenvectors' must be NxN and stored in row-major order.
+    // 'eigenvectors' must have N*N elements.  The array is filled in as
+    // if the eigenvector matrix is stored in row-major order.  The i-th
+    // eigenvector is
+    //   (eigenvectors[i+size*0], ... eigenvectors[i+size*(size - 1)])
+    // which is the i-th column of 'eigenvectors' as an NxN matrix stored
+    // in row-major order.
     void GetEigenvectors(Real* eigenvectors) const;
 
-    // With no sorting, when N is odd the matrix returned by GetEigenvectors
-    // is a reflection and when N is even it is a rotation.  With sorting
-    // enabled, the type of matrix returned depends on the permutation of
-    // columns.  If the permutation has C cycles, the minimum number of column
-    // transpositions is T = N-C.  Thus, when C is odd the matrix is a
-    // reflection and when C is even the matrix is a rotation.
-    bool IsRotation() const;
+    // The eigenvector matrix is a rotation (return +1) or a reflection
+    // (return 0).  If the input 'size' to the constructor is 0 or the
+    // input 'eigenvectors' to GetEigenvectors is null, the returned value
+    // is -1.
+    int GetEigenvectorMatrixType() const;
 
     // Compute a single eigenvector, which amounts to computing column c
     // of matrix Q.  The reflections and rotations are applied incrementally.
@@ -212,9 +215,12 @@ private:
     // When sorting is requested, the permutation associated with the sort is
     // stored in mPermutation.  When sorting is not requested, mPermutation[0]
     // is set to -1.  mVisited is used for finding cycles in the permutation.
+    // mEigenvectorMatrixType is +1 if GetEigenvectors returns a rotation
+    // matrix, 0 if GetEigenvectors returns a reflection matrix or -1 if an
+    // input to the constructor or to GetEigenvectors is invalid.
     std::vector<int> mPermutation;  // N elements
     mutable std::vector<int> mVisited;  // N elements
-    mutable int mIsRotation;  // 1 = rotation, 0 = reflection, -1 = unknown
+    mutable int mEigenvectorMatrixType;
 
     // Temporary storage to compute Householder reflections and to support
     // sorting of eigenvectors.
@@ -230,7 +236,7 @@ SymmetricEigensolver<Real>::SymmetricEigensolver(int size,
     :
     mSize(0),
     mMaxIterations(0),
-    mIsRotation(-1)
+    mEigenvectorMatrixType(-1)
 {
     if (size > 1 && maxIterations > 0)
     {
@@ -252,6 +258,8 @@ template <typename Real>
 unsigned int SymmetricEigensolver<Real>::Solve(Real const* input,
     int sortType)
 {
+    mEigenvectorMatrixType = -1;
+
     if (mSize > 0)
     {
         std::copy(input, input + mSize*mSize, mMatrix.begin());
@@ -332,6 +340,8 @@ void SymmetricEigensolver<Real>::GetEigenvalues(Real* eigenvalues) const
 template <typename Real>
 void SymmetricEigensolver<Real>::GetEigenvectors(Real* eigenvectors) const
 {
+    mEigenvectorMatrixType = -1;
+
     if (eigenvectors && mSize > 0)
     {
         // Start with the identity matrix.
@@ -394,10 +404,12 @@ void SymmetricEigensolver<Real>::GetEigenvectors(Real* eigenvectors) const
             }
         }
 
-        // The number of Householder reflections is N = (mSize-2)*(mSize-1)/2.
-        // If N is even, the product of Householder reflections is a rotation;
-        // otherwise, N is odd and the product is a reflection.
-        mIsRotation = 1 - (((mSize - 2) * (mSize - 1) / 2) & 1);
+        // The number of Householder reflections is H = mSize - 2.  If H is
+        // even, the product of Householder reflections is a rotation;
+        // otherwise, H is odd and the product is a reflection.  The number 
+        // of Givens rotations does not influence the type of the product of
+        // Householder reflections.
+        mEigenvectorMatrixType = 1 - (mSize & 1);
 
         if (mPermutation[0] >= 0)
         {
@@ -415,7 +427,7 @@ void SymmetricEigensolver<Real>::GetEigenvectors(Real* eigenvectors) const
                     }
                     while ((next = mPermutation[current]) != start)
                     {
-                        mIsRotation = 1 - mIsRotation;
+                        mEigenvectorMatrixType = 1 - mEigenvectorMatrixType;
                         mVisited[current] = 1;
                         for (j = 0; j < mSize; ++j)
                         {
@@ -436,47 +448,9 @@ void SymmetricEigensolver<Real>::GetEigenvectors(Real* eigenvectors) const
 }
 
 template <typename Real>
-bool SymmetricEigensolver<Real>::IsRotation() const
+int SymmetricEigensolver<Real>::GetEigenvectorMatrixType() const
 {
-    if (mSize > 0)
-    {
-        if (mIsRotation == -1)
-        {
-            // Without sorting, the matrix is a rotation when size is even.
-            // The number of Householder reflections is
-            // N = (mSize-2)*(mSize-1)/2.  If N is even, the product of
-            // Householder reflections is a rotation; otherwise, N is odd and
-            // the product is a reflection.
-            mIsRotation = 1 - (((mSize - 2) * (mSize - 1) / 2) & 1);
-
-            if (mPermutation[0] >= 0)
-            {
-                // With sorting, the matrix is a rotation when the number of
-                // cycles in the permutation is even.
-                std::fill(mVisited.begin(), mVisited.end(), 0);
-                for (int i = 0; i < mSize; ++i)
-                {
-                    if (mVisited[i] == 0 && mPermutation[i] != i)
-                    {
-                        // The item starts a cycle with 2 or more elements.
-                        int start = i, current = i, next;
-                        while ((next = mPermutation[current]) != start)
-                        {
-                            mIsRotation = 1 - mIsRotation;
-                            mVisited[current] = 1;
-                            current = next;
-                        }
-                        mVisited[current] = 1;
-                    }
-                }
-            }
-        }
-        return mIsRotation == 1;
-    }
-    else
-    {
-        return false;
-    }
+    return mEigenvectorMatrixType;
 }
 
 template <typename Real>
@@ -768,7 +742,12 @@ void SymmetricEigensolver<Real>::DoQRImplicitShift(int imin, int imax)
 template <typename Real>
 void SymmetricEigensolver<Real>::ComputePermutation(int sortType)
 {
-    mIsRotation = -1;
+    // The number of Householder reflections is H = mSize - 2.  If H is
+    // even, the product of Householder reflections is a rotation;
+    // otherwise, H is odd and the product is a reflection.  The number 
+    // of Givens rotations does not influence the type of the product of
+    // Householder reflections.
+    mEigenvectorMatrixType = 1 - (mSize & 1);
 
     if (sortType == 0)
     {

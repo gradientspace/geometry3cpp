@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/08/20)
 
 #pragma once
 
@@ -244,7 +244,7 @@ bool Hyperellipsoid<N, Real>::FromCoefficients(Matrix<N, N, Real> const& A,
     es.Solve(&M[0], +1);  // diagonal[i] are nondecreasing
     es.GetEigenvalues(&diagonal[0]);
     es.GetEigenvectors(&rotation[0]);
-    if (!es.IsRotation())
+    if (es.GetEigenvectorMatrixType() == 0)
     {
         auto negLast = -rotation.GetCol(N - 1);
         rotation.SetCol(N - 1, negLast);

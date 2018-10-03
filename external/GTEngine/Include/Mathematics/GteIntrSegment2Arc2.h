@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/06/22)
 
 #pragma once
 
@@ -61,6 +61,8 @@ FIQuery<Real, Segment2<Real>, Arc2<Real>>::operator()(
     Segment2<Real> const& segment, Arc2<Real> const& arc)
 {
     Result result;
+    result.intersect = false;
+    result.numIntersections = 0;
 
     FIQuery<Real, Segment2<Real>, Circle2<Real>> scQuery;
     Circle2<Real> circle(arc.center, arc.radius);
@@ -68,7 +70,6 @@ FIQuery<Real, Segment2<Real>, Arc2<Real>>::operator()(
     if (scResult.intersect)
     {
         // Test whether line-circle intersections are on the arc.
-        result.numIntersections = 0;
         for (int i = 0; i < scResult.numIntersections; ++i)
         {
             if (arc.Contains(scResult.point[i]))
@@ -81,14 +82,8 @@ FIQuery<Real, Segment2<Real>, Arc2<Real>>::operator()(
             }
         }
     }
-    else
-    {
-        result.intersect = false;
-        result.numIntersections = 0;
-    }
 
     return result;
 }
-
 
 }

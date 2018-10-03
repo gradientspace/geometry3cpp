@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.1 (2016/09/20)
+// File Version: 3.0.2 (2017/08/03)
 
 #pragma once
 
@@ -107,10 +107,10 @@ private:
         std::array<Real, 3>& U, std::array<Real, 3>& V) const;
 
     void ComputeEigenvector0(Real a00, Real a01, Real a02, Real a11, Real a12, Real a22,
-        Real& eval0, std::array<Real, 3>& evec0) const;
+        Real eval0, std::array<Real, 3>& evec0) const;
 
     void ComputeEigenvector1(Real a00, Real a01, Real a02, Real a11, Real a12, Real a22,
-        std::array<Real, 3> const& evec0, Real& eval1, std::array<Real, 3>& evec1) const;
+        std::array<Real, 3> const& evec0, Real eval1, std::array<Real, 3>& evec1) const;
 };
 
 
@@ -503,27 +503,20 @@ void NISymmetricEigensolver3x3<Real>::operator() (Real a00, Real a01, Real a02,
         eval[1] = traceDiv3 + denom * beta1;
         eval[2] = traceDiv3 + denom * beta2;
 
-        // The index i0 corresponds to the root guaranteed to have multiplicity 1
-        // and goes with either the maximum root or the minimum root.  The index
-        // i2 goes with the root of the opposite extreme.  Root beta2 is always
-        // between beta0 and beta1.
-        int i0, i2, i1 = 1;
+        // Compute the eigenvectors so that the set {evec[0], evec[1], evec[2]}
+        // is right handed and orthonormal.
         if (halfDet >= (Real)0)
         {
-            i0 = 2;
-            i2 = 0;
+            ComputeEigenvector0(a00, a01, a02, a11, a12, a22, eval[2], evec[2]);
+            ComputeEigenvector1(a00, a01, a02, a11, a12, a22, evec[2], eval[1], evec[1]);
+            evec[0] = Cross(evec[1], evec[2]);
         }
         else
         {
-            i0 = 0;
-            i2 = 2;
+            ComputeEigenvector0(a00, a01, a02, a11, a12, a22, eval[0], evec[0]);
+            ComputeEigenvector1(a00, a01, a02, a11, a12, a22, evec[0], eval[1], evec[1]);
+            evec[2] = Cross(evec[0], evec[1]);
         }
-
-        // Compute the eigenvectors.  The set { evec[0], evec[1], evec[2] } is
-        // right handed and orthonormal.
-        ComputeEigenvector0(a00, a01, a02, a11, a12, a22, eval[i0], evec[i0]);
-        ComputeEigenvector1(a00, a01, a02, a11, a12, a22, evec[i0], eval[i1], evec[i1]);
-        evec[i2] = Cross(evec[i0], evec[i1]);
     }
     else
     {
@@ -555,7 +548,7 @@ template <typename Real>
 std::array<Real, 3> NISymmetricEigensolver3x3<Real>::Subtract(
     std::array<Real, 3> const& U, std::array<Real, 3> const& V)
 {
-    std::array<float, 3> difference = { U[0] - V[0], U[1] - V[1], U[2] - V[2] };
+    std::array<Real, 3> difference = { U[0] - V[0], U[1] - V[1], U[2] - V[2] };
     return difference;
 }
 
@@ -614,7 +607,7 @@ void NISymmetricEigensolver3x3<Real>::ComputeOrthogonalComplement(
 
 template <typename Real>
 void NISymmetricEigensolver3x3<Real>::ComputeEigenvector0(Real a00, Real a01,
-    Real a02, Real a11, Real a12, Real a22, Real& eval0, std::array<Real, 3>& evec0) const
+    Real a02, Real a11, Real a12, Real a22, Real eval0, std::array<Real, 3>& evec0) const
 {
     // Compute a unit-length eigenvector for eigenvalue[i0].  The matrix is
     // rank 2, so two of the rows are linearly independent.  For a robust
@@ -659,7 +652,7 @@ void NISymmetricEigensolver3x3<Real>::ComputeEigenvector0(Real a00, Real a01,
 template <typename Real>
 void NISymmetricEigensolver3x3<Real>::ComputeEigenvector1(Real a00, Real a01,
     Real a02, Real a11, Real a12, Real a22, std::array<Real, 3> const& evec0,
-    Real& eval1, std::array<Real, 3>& evec1) const
+    Real eval1, std::array<Real, 3>& evec1) const
 {
     // Robustly compute a right-handed orthonormal set { U, V, evec0 }.
     std::array<Real, 3> U, V;

@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/05/23)
 
 #pragma once
 
@@ -129,6 +129,10 @@ FIQuery<Real, Segment3<Real>, AlignedBox3<Real>>::operator()(
 
     Result result;
     DoQuery(segOrigin, segDirection, segExtent, boxExtent, result);
+
+    // The segment origin is in aligned-box coordinates.  Transform it back
+    // to the original space.
+    segOrigin += boxCenter;
     for (int i = 0; i < result.numPoints; ++i)
     {
         result.point[i] = segOrigin + result.lineParameter[i] * segDirection;

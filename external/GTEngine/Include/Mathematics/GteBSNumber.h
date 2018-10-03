@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/07/04)
 
 #pragma once
 
@@ -913,7 +913,7 @@ typename IEEE::UIntType BSNumber<UIntegerType>::GetTrailing(int32_t normal,
     int32_t roundBitIndex = 64 - diff;
 
     // Determine rounding value based on round-to-nearest-ties-to-even.
-    uint64_t mask = (GTE_U64(1) << roundBitIndex);
+    uint64_t mask = (1ull << roundBitIndex);
     uint64_t round;
     if (prefix & mask)
     {

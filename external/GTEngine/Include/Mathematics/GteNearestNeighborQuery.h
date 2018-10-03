@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/07/26)
 
 #pragma once
 
@@ -25,22 +25,22 @@ namespace gte
 // 'Vector<N,Real> GetPosition () const'.  The Site template parameter
 // allows the query to be applied even when it has more local information
 // than just point location.
-template <int N, typename Real, typename Site, int MaxNeighbors>
+template <int N, typename Real, typename Site>
 class NearestNeighborQuery
 {
 public:
     // Construction.
-    NearestNeighborQuery(std::vector<Site> const& sites, int maxLeafSize,
-        int maxLevel);
+    NearestNeighborQuery(std::vector<Site> const& sites, int maxLeafSize, int maxLevel);
 
     // Member access.
     inline int GetMaxLeafSize () const;
     inline int GetMaxLevel () const;
 
-    // Compute up to MaxNeighbor nearest neighbors within the specified radius
-    // of the point.  The returned integer is the number of neighbors found,
-    // possibly zero.  The neighbors array stores indices into the array
-    // passed to the constructor.
+    // Compute up to MaxNeighbors nearest neighbors within the specified
+    // radius of the point.  The returned integer is the number of neighbors
+    // found, possibly zero.  The neighbors array stores indices into the
+    // array passed to the constructor.
+    template <int MaxNeighbors>
     int FindNeighbors(Vector<N,Real> const& point, Real radius,
         std::array<int, MaxNeighbors>& neighbors) const;
 
@@ -61,17 +61,6 @@ private:
     // coordinate axes.
     void Build(int numSites, int siteOffset, int nodeIndex, int level);
 
-    // Helper class for sorting along axes.
-    class SortFunctor
-    {
-    public:
-        inline SortFunctor(int axis);
-        inline bool operator()(SortedPoint const& sorted0,
-            SortedPoint const& sorted1) const;
-   private:
-        int mAxis;
-    };
-
     int mMaxLeafSize;
     int mMaxLevel;
     std::vector<SortedPoint> mSortedPoints;
@@ -79,8 +68,8 @@ private:
 };
 
 
-template <int N, typename Real, typename Site, int MaxNeighbors>
-NearestNeighborQuery<N, Real, Site, MaxNeighbors>::NearestNeighborQuery(
+template <int N, typename Real, typename Site>
+NearestNeighborQuery<N, Real, Site>::NearestNeighborQuery(
     std::vector<Site> const& sites, int maxLeafSize, int maxLevel)
     :
     mMaxLeafSize(maxLeafSize),
@@ -97,22 +86,22 @@ NearestNeighborQuery<N, Real, Site, MaxNeighbors>::NearestNeighborQuery(
     Build(numSites, 0, 0, 0);
 }
 
-template <int N, typename Real, typename Site, int MaxNeighbors> inline
-int NearestNeighborQuery<N, Real, Site, MaxNeighbors>::GetMaxLeafSize() const
+template <int N, typename Real, typename Site>
+inline int NearestNeighborQuery<N, Real, Site>::GetMaxLeafSize() const
 {
     return mMaxLeafSize;
 }
 
-template <int N, typename Real, typename Site, int MaxNeighbors> inline
-int NearestNeighborQuery<N, Real, Site, MaxNeighbors>::GetMaxLevel() const
+template <int N, typename Real, typename Site>
+inline int NearestNeighborQuery<N, Real, Site>::GetMaxLevel() const
 {
     return mMaxLevel;
 }
 
-template <int N, typename Real, typename Site, int MaxNeighbors>
-int NearestNeighborQuery<N, Real, Site, MaxNeighbors>::FindNeighbors(
-    Vector<N, Real> const& point, Real radius,
-    std::array<int, MaxNeighbors>& neighbors) const
+template <int N, typename Real, typename Site>
+template <int MaxNeighbors>
+int NearestNeighborQuery<N, Real, Site>::FindNeighbors(Vector<N, Real> const& point,
+    Real radius, std::array<int, MaxNeighbors>& neighbors) const
 {
     Real sqrRadius = radius * radius;
     int numNeighbors = 0;
@@ -189,9 +178,9 @@ int NearestNeighborQuery<N, Real, Site, MaxNeighbors>::FindNeighbors(
     return numNeighbors;
 }
 
-template <int N, typename Real, typename Site, int MaxNeighbors>
-void NearestNeighborQuery<N, Real, Site, MaxNeighbors>::Build(int numSites,
-    int siteOffset, int nodeIndex, int level)
+template <int N, typename Real, typename Site>
+void NearestNeighborQuery<N, Real, Site>::Build(int numSites, int siteOffset,
+    int nodeIndex, int level)
 {
     LogAssert(siteOffset != -1, "Invalid site offset.");
     LogAssert(nodeIndex != -1, "Invalid node index.");
@@ -209,7 +198,11 @@ void NearestNeighborQuery<N, Real, Site, MaxNeighbors>::Build(int numSites,
         // median using an order statistic construction that is expected
         // time O(m).
         int const axis = level % N;
-        SortFunctor sorter(axis);
+        auto sorter = [axis](SortedPoint const& p0, SortedPoint const& p1)
+        {
+            return p0.first[axis] < p1.first[axis];
+        };
+
         auto begin = mSortedPoints.begin() + siteOffset;
         auto mid = mSortedPoints.begin() + siteOffset + halfNumSites;
         auto end = mSortedPoints.begin() + siteOffset + numSites;
@@ -229,8 +222,7 @@ void NearestNeighborQuery<N, Real, Site, MaxNeighbors>::Build(int numSites,
 
         int nextLevel = level + 1;
         Build(halfNumSites, siteOffset, left, nextLevel);
-        Build(numSites - halfNumSites, siteOffset + halfNumSites, right,
-            nextLevel);
+        Build(numSites - halfNumSites, siteOffset + halfNumSites, right, nextLevel);
     }
     else
     {
@@ -242,21 +234,5 @@ void NearestNeighborQuery<N, Real, Site, MaxNeighbors>::Build(int numSites,
         node.right = -1;
     }
 }
-
-template <int N, typename Real, typename Site, int MaxNeighbors> inline
-NearestNeighborQuery<N, Real, Site, MaxNeighbors>::SortFunctor::SortFunctor(
-int axis)
-:
-mAxis(axis)
-{
-}
-
-template <int N, typename Real, typename Site, int MaxNeighbors> inline
-bool NearestNeighborQuery<N, Real, Site, MaxNeighbors>::SortFunctor::
-operator()(SortedPoint const& sorted0, SortedPoint const& sorted1) const
-{
-    return sorted0.first[mAxis] < sorted1.first[mAxis];
-}
-
 
 }

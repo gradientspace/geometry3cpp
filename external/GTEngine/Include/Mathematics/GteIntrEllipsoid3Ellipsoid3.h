@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2017/09/05)
 
 #pragma once
 
@@ -70,9 +70,9 @@ TIQuery<Real, Ellipsoid3<Real>, Ellipsoid3<Real>>::operator()(
     R0.SetCol(1, ellipsoid0.axis[1]);
     R0.SetCol(2, ellipsoid0.axis[2]);
     Matrix3x3<Real> D0{
-        one / (ellipsoid0.extent[0] * ellipsoid0.extent[0]),
-        one / (ellipsoid0.extent[1] * ellipsoid0.extent[1]),
-        one / (ellipsoid0.extent[2] * ellipsoid0.extent[2]) };
+        one / (ellipsoid0.extent[0] * ellipsoid0.extent[0]), zero, zero,
+        zero, one / (ellipsoid0.extent[1] * ellipsoid0.extent[1]), zero,
+        zero, zero, one / (ellipsoid0.extent[2] * ellipsoid0.extent[2]) };
 
     // Get the parameters of ellipsoid1.
     Vector3<Real> K1 = ellipsoid1.center;
@@ -81,19 +81,19 @@ TIQuery<Real, Ellipsoid3<Real>, Ellipsoid3<Real>>::operator()(
     R1.SetCol(1, ellipsoid1.axis[1]);
     R1.SetCol(2, ellipsoid1.axis[2]);
     Matrix3x3<Real> D1{
-        one / (ellipsoid1.extent[0] * ellipsoid1.extent[0]),
-        one / (ellipsoid1.extent[1] * ellipsoid1.extent[1]),
-        one / (ellipsoid1.extent[2] * ellipsoid1.extent[2]) };
+        one / (ellipsoid1.extent[0] * ellipsoid1.extent[0]), zero, zero,
+        zero, one / (ellipsoid1.extent[1] * ellipsoid1.extent[1]), zero,
+        zero, zero, one / (ellipsoid1.extent[2] * ellipsoid1.extent[2]) };
 
     // Compute K2.
     Matrix3x3<Real> D0NegHalf{
-        ellipsoid0.extent[0],
-        ellipsoid0.extent[1],
-        ellipsoid0.extent[2] };
+        ellipsoid0.extent[0], zero, zero,
+        zero, ellipsoid0.extent[1], zero,
+        zero, zero, ellipsoid0.extent[2] };
     Matrix3x3<Real> D0Half{
-        one / ellipsoid0.extent[0],
-        one / ellipsoid0.extent[1],
-        one / ellipsoid0.extent[2] };
+        one / ellipsoid0.extent[0], zero, zero,
+        zero, one / ellipsoid0.extent[1], zero,
+        zero, zero, one / ellipsoid0.extent[2] };
     Vector3<Real> K2 = D0Half*((K1 - K0)*R0);
 
     // Compute M2.

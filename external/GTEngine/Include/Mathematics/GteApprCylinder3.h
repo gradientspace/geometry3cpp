@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.3.1 (2016/11/20)
+// File Version: 3.3.3 (2017/08/10)
 
 #pragma once
 
@@ -32,42 +32,76 @@ template <typename Real>
 class ApprCylinder3
 {
 public:
-    // Construction.
-    //
-    // To run in the main process, choose numThreads = 0.  To run
-    // multithreaded, choose numThreads > 0.
-    //
-    // To search the hemisphere for a minimum, choose numThetaSamples and
+    // Search the hemisphere for a minimum, choose numThetaSamples and
     // numPhiSamples to be positive (and preferably large).  These are used
     // to generate a hemispherical grid of samples to be evaluated to find
     // the cylinder axis-direction W.  If the grid samples is quite large
     // and the number of points to be fitted is large, you most likely will
-    // want to run multithreaded.
-    //
-    // Choose numThetaSamples and numPhiSamples to be zero if you want the
-    // fitter to use the eigenvector corresponding to the largest eigenvalue
-    // of the covariance matrix as the cylinder axis direction.  In this
-    // case, multithreading is not used because there is much less work to do.
+    // want to run multithreaded.  Set numThreads to 0 to run single-threaded
+    // in the main process.  Set numThreads > 0 to run multithreaded.  If
+    // either of numThetaSamples or numPhiSamples is zero, the operator() sets
+    // the cylinder origin and axis to the zero vectors, the radius and height
+    // to zero, and returns std::numeric_limits<Real>::max().
     ApprCylinder3(unsigned int numThreads, unsigned int numThetaSamples,
         unsigned int numPhiSamples);
 
-    // The algorithm must estimate 6 parameters, so the number of points should
-    // be at least 6 but preferably larger.  If the number of points is smaller
-    // than 6, the returned 'Real' value is std::numeric_limits<Real>::max();
-    // otherwise, the returned 'Real' value is the root-mean-square of the
-    // least-squares error:  sqrt((sum_{i=0}^{N-1} error[i]^2)/N).
+    // TODO: Add a constructor that will use a numerical minimizer to search
+    // the hemisphere efficiently.
+
+    // Choose one of the eigenvectors for the covariance matrix as the
+    // cylinder axis direction.  If eigenIndex is 0, the eigenvector
+    // associated with the smallest eigenvalue is chosen.  If eigenIndex is 2,
+    // the eigenvector associated with the largest eigenvalue is chosen.  If
+    // eigenIndex is 1, the eigenvector associated with the median eigenvalue
+    // is chosen; keep in mind that this could be the minimum or maximum
+    // eigenvalue if the eigenspace has dimension 2 or 3.  If eigenIndex is
+    // 3 or larger, the operator() sets the cylinder origin and axis to the
+    // zero vectors, the radius and height to zero, and returns
+    // std::numeric_limits<Real>::max().
+    ApprCylinder3(unsigned int eigenIndex);
+
+    // Choose the cylinder axis.  If cylinderAxis is not the zero vector,
+    // the constructor will normalize it.  If cylinderAxis is the zero vector,
+    // the operator() sets the cylinder origin and axis to the zero vectors,
+    // the radius and height to zero, and returns
+    // std::numeric_limits<Real>::max().
+    ApprCylinder3(Vector3<Real> const& cylinderAxis);
+
+    // The algorithm must estimate 6 parameters, so the number of points must
+    // be at least 6 but preferably larger.  The returned value is the
+    // root-mean-square of the least-squares error.  If numPoints is less than
+    // 6 or if points is a null pointer, the operator() sets the cylinder origin
+    // and axis to the zero vectors, the radius and height to zero, and returns
+    // std::numeric_limits<Real>::max().
     Real operator()(unsigned int numPoints, Vector3<Real> const* points,
         Cylinder3<Real>& cylinder);
 
 private:
+    enum ConstructorType
+    {
+        FIT_BY_HEMISPHERE_SEARCH,
+        FIT_USING_COVARIANCE_EIGENVECTOR,
+        FIT_USING_SPECIFIED_AXIS
+    };
+
+    Real ComputeUsingDirection(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr);
     Real ComputeUsingCovariance(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr);
     Real ComputeSingleThreaded(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr);
     Real ComputeMultiThreaded(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr);
     Real Error(Vector3<Real> const& W, Vector3<Real>& PC, Real& rsqr) const;
 
+    ConstructorType mConstructorType;
+
+    // Parameters for the hemisphere-search constructor.
     unsigned int mNumThreads;
     unsigned int mNumThetaSamples;
     unsigned int mNumPhiSamples;
+
+    // Parameters for the eigenvector-index constructor.
+    unsigned int mEigenIndex;
+
+    // Parameters for the specified-axis constructor.
+    Vector3<Real> mCylinderAxis;
 
     // A copy of the input points but translated by their average for
     // numerical robustness.
@@ -79,26 +113,57 @@ template <typename Real>
 ApprCylinder3<Real>::ApprCylinder3(unsigned int numThreads, unsigned int numThetaSamples,
     unsigned int numPhiSamples)
     :
+    mConstructorType(FIT_BY_HEMISPHERE_SEARCH),
     mNumThreads(numThreads),
     mNumThetaSamples(numThetaSamples),
     mNumPhiSamples(numPhiSamples),
+    mEigenIndex(0),
     mInvNumPoints((Real)0)
 {
+    mCylinderAxis = { 0.0f, 0.0f, 0.0f };
+}
+
+template <typename Real>
+ApprCylinder3<Real>::ApprCylinder3(unsigned int eigenIndex)
+    :
+    mConstructorType(FIT_USING_COVARIANCE_EIGENVECTOR),
+    mNumThreads(0),
+    mNumThetaSamples(0),
+    mNumPhiSamples(0),
+    mEigenIndex(eigenIndex),
+    mInvNumPoints((Real)0)
+{
+    mCylinderAxis = { 0.0f, 0.0f, 0.0f };
+}
+
+template <typename Real>
+ApprCylinder3<Real>::ApprCylinder3(Vector3<Real> const& cylinderAxis)
+    :
+    mConstructorType(FIT_USING_SPECIFIED_AXIS),
+    mNumThreads(0),
+    mNumThetaSamples(0),
+    mNumPhiSamples(0),
+    mEigenIndex(0),
+    mCylinderAxis(cylinderAxis),
+    mInvNumPoints((Real)0)
+{
+    Normalize(mCylinderAxis, true);
 }
 
 template <typename Real>
 Real ApprCylinder3<Real>::operator()(unsigned int numPoints, Vector3<Real> const* points,
     Cylinder3<Real>& cylinder)
 {
+    mX.clear();
+    mInvNumPoints = (Real)0;
+    cylinder.axis.origin = Vector3<Real>::Zero();
+    cylinder.axis.direction = Vector3<Real>::Zero();
+    cylinder.radius = (Real)0;
+    cylinder.height = (Real)0;
+
+    // Validate the input parameters.
     if (numPoints < 6 || !points)
     {
-        mX.clear();
-        mInvNumPoints = 0;
-
-        cylinder.axis.origin = Vector3<Real>::Zero();
-        cylinder.axis.direction = Vector3<Real>::Zero();
-        cylinder.radius = (Real)0;
-        cylinder.height = (Real)0;
         return std::numeric_limits<Real>::max();
     }
 
@@ -117,18 +182,20 @@ Real ApprCylinder3<Real>::operator()(unsigned int numPoints, Vector3<Real> const
         mX[i] = points[i] - average;
     }
 
-    // Estimate the center, direction, and squared radius.
+    // Fit the points based on which constructor the caller used.  The
+    // direction is either estimated or selected directly or indirectly
+    // by the caller.  The center and squared radius are estimated.
     Vector3<Real> minPC, minW;
     Real minRSqr, minError;
 
-    if (mNumThetaSamples == 0 || mNumPhiSamples == 0)
+    if (mConstructorType == FIT_BY_HEMISPHERE_SEARCH)
     {
-        // Use the eigenvector corresponding to the maximum eigenvalue of
-        // the covariance matrix as the cylinder axis direction.
-        minError = ComputeUsingCovariance(minPC, minW, minRSqr);
-    }
-    else
-    {
+        // Validate the relevant internal parameters.
+        if (mNumThetaSamples == 0 || mNumPhiSamples == 0)
+        {
+            return std::numeric_limits<Real>::max();
+        }
+
         // Search the hemisphere for the vector that leads to minimum error
         // and use it for the cylinder axis.
         if (mNumThreads == 0)
@@ -141,6 +208,31 @@ Real ApprCylinder3<Real>::operator()(unsigned int numPoints, Vector3<Real> const
             // Execute the algorithm in multiple threads.
             minError = ComputeMultiThreaded(minPC, minW, minRSqr);
         }
+    }
+    else if (mConstructorType == FIT_USING_COVARIANCE_EIGENVECTOR)
+    {
+        // Validate the relevant internal parameters.
+        if (mEigenIndex >= 3)
+        {
+            return std::numeric_limits<Real>::max();
+        }
+
+        // Use the eigenvector corresponding to the mEigenIndex of the
+        // eigenvectors of the covariance matrix as the cylinder axis
+        // direction.  The eigenvectors are sorted from smallest
+        // eigenvalue (mEigenIndex = 0) to largest eigenvalue
+        // (mEigenIndex = 2).
+        minError = ComputeUsingCovariance(minPC, minW, minRSqr);
+    }
+    else  // mConstructorType == FIT_USING_SPECIFIED_AXIS
+    {
+        // Validate the relevant internal parameters.
+        if (mCylinderAxis == Vector3<Real>::Zero())
+        {
+            return std::numeric_limits<Real>::max();
+        }
+
+        minError = ComputeUsingDirection(minPC, minW, minRSqr);
     }
 
     // Translate back to the original space by the average of the points.
@@ -167,6 +259,13 @@ Real ApprCylinder3<Real>::operator()(unsigned int numPoints, Vector3<Real> const
 }
 
 template <typename Real>
+Real ApprCylinder3<Real>::ComputeUsingDirection(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr)
+{
+    minW = mCylinderAxis;
+    return Error(minW, minPC, minRSqr);
+}
+
+template <typename Real>
 Real ApprCylinder3<Real>::ComputeUsingCovariance(Vector3<Real>& minPC, Vector3<Real>& minW, Real& minRSqr)
 {
     Matrix3x3<Real> covar = Matrix3x3<Real>::Zero();
@@ -180,7 +279,7 @@ Real ApprCylinder3<Real>::ComputeUsingCovariance(Vector3<Real>& minPC, Vector3<R
     SymmetricEigensolver3x3<Real>()(
         covar(0, 0), covar(0, 1), covar(0, 2), covar(1, 1), covar(1, 2), covar(2, 2),
         true, +1, eval, evec);
-    minW = evec[2];
+    minW = evec[mEigenIndex];
     return Error(minW, minPC, minRSqr);
 }
 
@@ -237,14 +336,11 @@ Real ApprCylinder3<Real>::ComputeMultiThreaded(Vector3<Real>& minPC, Vector3<Rea
         Real rsqr;
         Vector3<Real> W;
         Vector3<Real> PC;
-        unsigned int imin;
-        unsigned int imax;
         unsigned int jmin;
         unsigned int jmax;
     };
 
     std::vector<Local> local(mNumThreads);
-    unsigned int numThetaSamplesPerThread = mNumThetaSamples / mNumThreads;
     unsigned int numPhiSamplesPerThread = mNumPhiSamples / mNumThreads;
     for (unsigned int t = 0; t < mNumThreads; ++t)
     {
@@ -252,12 +348,9 @@ Real ApprCylinder3<Real>::ComputeMultiThreaded(Vector3<Real>& minPC, Vector3<Rea
         local[t].rsqr = (Real)0;
         local[t].W = Vector3<Real>::Zero();
         local[t].PC = Vector3<Real>::Zero();
-        local[t].imin = numThetaSamplesPerThread * t;
-        local[t].imax = numThetaSamplesPerThread * (t + 1);
         local[t].jmin = numPhiSamplesPerThread * t;
         local[t].jmax = numPhiSamplesPerThread * (t + 1);
     }
-    local[mNumThreads - 1].imax = mNumThetaSamples;
     local[mNumThreads - 1].jmax = mNumPhiSamples + 1;
 
     std::vector<std::thread> process(mNumThreads);
@@ -272,7 +365,7 @@ Real ApprCylinder3<Real>::ComputeMultiThreaded(Vector3<Real>& minPC, Vector3<Rea
                 Real phi = jMultiplier * static_cast<Real>(j);  // in [0,pi/2]
                 Real csphi = cos(phi);
                 Real snphi = sin(phi);
-                for (unsigned int i = local[t].imin; i < local[t].imax; ++i)
+                for (unsigned int i = 0; i < mNumThetaSamples; ++i)
                 {
                     Real theta = iMultiplier * static_cast<Real>(i);  // in [0,2*pi)
                     Real cstheta = cos(theta);

@@ -1,9 +1,9 @@
 // David Eberly, Geometric Tools, Redmond WA 98052
-// Copyright (c) 1998-2017
+// Copyright (c) 1998-2018
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt
 // http://www.geometrictools.com/License/Boost/LICENSE_1_0.txt
-// File Version: 3.0.0 (2016/06/19)
+// File Version: 3.0.1 (2018/02/17)
 
 #pragma once
 
@@ -202,12 +202,12 @@ GenerateMeshUV<Real>::UVComputeModel::UVComputeModel(unsigned int inNumThreads,
 template <typename Real>
 GenerateMeshUV<Real>::GenerateMeshUV(std::shared_ptr<UVComputeModel> const& cmodel)
     :
-    mCModel(cmodel),
     mNumVertices(0),
     mVertices(nullptr),
     mTCoords(nullptr),
     mNumBoundaryEdges(0),
-    mBoundaryStart(0)
+    mBoundaryStart(0),
+    mCModel(cmodel)
 {
 }
 
@@ -369,7 +369,7 @@ void GenerateMeshUV<Real>::TopologicalVertexDistanceTransform()
     }
 
     // Use a breadth-first search to propagate the distance information.
-    int currDistance = 0, nextDistance = 1;
+    int nextDistance = 1;
     size_t numFrontVertices = currFront.size();
     std::copy(currFront.begin(), currFront.end(), mOrderedVertices.begin());
     while (currFront.size() > 0)
@@ -392,7 +392,7 @@ void GenerateMeshUV<Real>::TopologicalVertexDistanceTransform()
         std::copy(nextFront.begin(), nextFront.end(), mOrderedVertices.begin() + numFrontVertices);
         numFrontVertices += nextFront.size();
         currFront = std::move(nextFront);
-        currDistance = nextDistance++;
+        ++nextDistance;
     }
 }
 
