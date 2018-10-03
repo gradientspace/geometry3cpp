@@ -925,7 +925,7 @@ public:
     /// <summary>
     /// efficiently compute centroid of triangle
     /// </summary>
-    Vector3d GetTriCentroid(int tID)
+    Vector3d GetTriCentroid(int tID) const
     {
         int ai = 3 * triangles[3 * tID], 
             bi = 3 * triangles[3 * tID + 1], 
@@ -981,7 +981,7 @@ public:
     /// <summary>
     /// construct bounding box of triangle as efficiently as possible
     /// </summary>
-    AxisAlignedBox3d GetTriBounds(int tID)
+    AxisAlignedBox3d GetTriBounds(int tID) const
     {
         int vi = 3 * triangles[3 * tID];
         double x = vertices[vi], y = vertices[vi + 1], z = vertices[vi + 2];

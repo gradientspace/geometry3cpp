@@ -15,6 +15,7 @@
 #include <refcount_vector.h>
 #include <small_list_set.h>
 #include <DMesh3.h>
+#include <DMeshAABBTree3.h>
 using namespace g3;
 
 int main(int argc, char ** argv) 
@@ -64,6 +65,10 @@ int main(int argc, char ** argv)
 			std::cout << tid << " ";
 		std::cout << std::endl;
 	}
+
+	DMeshAABBTree3 spatial(mesh, true);
+	double fNearDistSqr;
+	int near_tid = spatial.FindNearestTriangle(Vector3d(10, 1, 0), fNearDistSqr);
 
 
 	Vector3d axis(0,0,1);

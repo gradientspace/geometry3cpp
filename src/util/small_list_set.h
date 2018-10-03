@@ -292,7 +292,7 @@ public:
 	class value_iterator
 	{
 	public:
-		inline value_iterator() { p = nullptr; mapF = nullptr; list_index = 0; }
+		inline value_iterator() { p = nullptr; map_func = nullptr; list_index = 0; }
 
 		inline bool operator==(const value_iterator & r2) const {
 			return p == r2.p && list_index == r2.list_index;
@@ -302,7 +302,7 @@ public:
 		}
 
 		inline int operator*() const {
-			return (mapF == nullptr) ? cur_value : mapF(cur_value);
+			return (map_func == nullptr) ? cur_value : map_func(cur_value);
 		}
 
 		inline const value_iterator & operator++() {		// prefix
@@ -334,10 +334,10 @@ public:
 		}
 
 		inline value_iterator(const small_list_set * pVector, int list_index, bool is_end, 
-			const std::function<int(int)> & value_mapper = nullptr )
+			const std::function<int(int)> & map_func = nullptr )
 		{
 			p = pVector;
-			mapF = value_mapper;
+			this->map_func = map_func;
 			this->list_index = list_index;
 			if (is_end) {
 				set_to_end();
@@ -362,7 +362,7 @@ public:
 		}
 
 		const small_list_set * p;
-		std::function<int(int)> mapF;
+		std::function<int(int)> map_func;
 		int list_index;
 		int block_ptr;
 		int N;
@@ -375,8 +375,8 @@ public:
 	inline value_iterator begin_values(int list_index) const {
 		return value_iterator(this, list_index, false);
 	}
-	inline value_iterator begin_values(int list_index, const std::function<int(int)> & value_mapper) const {
-		return value_iterator(this, list_index, false, value_mapper);
+	inline value_iterator begin_values(int list_index, const std::function<int(int)> & map_func) const {
+		return value_iterator(this, list_index, false, map_func);
 	}
 	inline value_iterator end_values(int list_index) const {
 		return value_iterator(this, list_index, true);
@@ -388,21 +388,21 @@ public:
 	public:
 		const small_list_set * p;
 		int list_index;
-		std::function<int(int)> value_mapper;
+		std::function<int(int)> map_func;
 		value_enumerable() {}
-		value_enumerable(const small_list_set * p, int list_index, std::function<int(int)> value_mapper = nullptr) {
+		value_enumerable(const small_list_set * p, int list_index, std::function<int(int)> map_func = nullptr) {
 			this->p = p; 
 			this->list_index = list_index; 
-			this->value_mapper = value_mapper;
+			this->map_func = map_func;
 		}
-		typename small_list_set::value_iterator begin() { return p->begin_values(list_index, value_mapper); }
+		typename small_list_set::value_iterator begin() { return p->begin_values(list_index, map_func); }
 		typename small_list_set::value_iterator end() { return p->end_values(list_index); }
 	};
 	inline value_enumerable values(int list_index) const {
 		return value_enumerable(this, list_index);
 	}
-	inline value_enumerable values(int list_index, const std::function<int(int)> & value_mapper) const {
-		return value_enumerable(this, list_index, value_mapper);
+	inline value_enumerable values(int list_index, const std::function<int(int)> & map_func) const {
+		return value_enumerable(this, list_index, map_func);
 	}
 
 /*

@@ -48,6 +48,7 @@ namespace g3
 	typedef Wml::Math<float> Mathf;
 	typedef Wml::Math<double> Mathd;
 
+	typedef Wml::Interval1d Interval1d;
 
 	template <typename T, int D> using Vector = Eigen::Matrix<T, D, 1>;
 	template <typename T, int A> using SquareMatrix = Eigen::Matrix<T, A, A>;
