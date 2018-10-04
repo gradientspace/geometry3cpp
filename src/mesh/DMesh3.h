@@ -1827,6 +1827,7 @@ public:
     }
 
 
+protected:
 
     bool tri_has_v(int tID, int vID) const {
 		int i = 3*tID;
@@ -1884,9 +1885,6 @@ public:
 	}
 
 
-    bool IsBoundaryEdge(int eid) const {
-        return edges[4 * eid + 3] == InvalidID;
-    }
 
     bool edge_has_v(int eid, int vid) const {
 		int i = 4*eid;
@@ -1909,6 +1907,48 @@ public:
     }
 
 
+
+	int find_edge(int vA, int vB) const
+	{
+		// [RMS] edge vertices must be sorted (min,max),
+		//   that means we only need one index-check in inner loop.
+		//   commented out code is robust to incorrect ordering, but slower.
+		int vO = std::max(vA, vB);
+		int vI = std::min(vA, vB);
+		for (int eid : vertex_edges.values(vI)) {
+			if (edges[4 * eid + 1] == vO)
+				//if (edge_has_v(eid, vO))
+				return eid;
+		}
+		return InvalidID;
+
+		// this is slower, likely because it creates func<> every time. can we do w/o that?
+		//return vertex_edges.Find(vI, (eid) => { return edges[4 * eid + 1] == vO; }, InvalidID);
+	}
+
+	int find_edge_from_tri(int vA, int vB, int tID) const
+	{
+		int i = 3 * tID;
+		int t0 = triangles[i], t1 = triangles[i + 1];
+		if (same_pair_unordered(vA, vB, t0, t1))
+			return triangle_edges[i];
+		int t2 = triangles[i + 2];
+		if (same_pair_unordered(vA, vB, t1, t2))
+			return triangle_edges[i + 1];
+		if (same_pair_unordered(vA, vB, t2, t0))
+			return triangle_edges[i + 2];
+		return InvalidID;
+	}
+
+
+
+public:
+
+	bool IsBoundaryEdge(int eid) const {
+		return edges[4 * eid + 3] == InvalidID;
+	}
+
+
     bool IsBoundaryVertex(int vID) const {
 		for (int eid : vertex_edges.values(vID)) {
             if (edges[4 * eid + 3] == InvalidID)
@@ -1929,38 +1969,6 @@ public:
     }
 
 
-
-    int find_edge(int vA, int vB) const
-    {
-        // [RMS] edge vertices must be sorted (min,max),
-        //   that means we only need one index-check in inner loop.
-        //   commented out code is robust to incorrect ordering, but slower.
-        int vO = std::max(vA, vB);
-        int vI = std::min(vA, vB);
-		for (int eid : vertex_edges.values(vI)) {
-            if (edges[4 * eid + 1] == vO)
-                //if (edge_has_v(eid, vO))
-                return eid;
-        }
-        return InvalidID;
-
-        // this is slower, likely because it creates func<> every time. can we do w/o that?
-        //return vertex_edges.Find(vI, (eid) => { return edges[4 * eid + 1] == vO; }, InvalidID);
-    }
-
-    int find_edge_from_tri(int vA, int vB, int tID) const
-    {
-        int i = 3 * tID;
-        int t0 = triangles[i], t1 = triangles[i + 1];
-        if (same_pair_unordered(vA, vB, t0, t1))
-            return triangle_edges[i];
-        int t2 = triangles[i + 2];
-        if (same_pair_unordered(vA, vB, t1, t2))
-            return triangle_edges[i+1];
-        if (same_pair_unordered(vA, vB, t2, t0))
-            return triangle_edges[i+2];
-        return InvalidID;
-    }
 
 
 

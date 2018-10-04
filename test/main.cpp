@@ -16,6 +16,8 @@
 #include <small_list_set.h>
 #include <DMesh3.h>
 #include <DMeshAABBTree3.h>
+#include <MeshQueries.h>
+
 using namespace g3;
 
 int main(int argc, char ** argv) 
@@ -68,7 +70,21 @@ int main(int argc, char ** argv)
 
 	DMeshAABBTree3 spatial(mesh, true);
 	double fNearDistSqr;
-	int near_tid = spatial.FindNearestTriangle(Vector3d(10, 1, 0), fNearDistSqr);
+
+	int n0 = 0, n1 = 0, fails = 0;
+	Wml::Mathd::IntervalRandom(-10, 10, 31337);
+	for (int k = 0; k < 1000; ++k) {
+		double x = Wml::Mathd::IntervalRandom(-10, 10);
+		double y = Wml::Mathd::IntervalRandom(-10, 10);
+		double z = Wml::Mathd::IntervalRandom(-10, 10);
+		int near_tid = spatial.FindNearestTriangle(Vector3d(x,y,z), fNearDistSqr);
+		if (near_tid == 0) n0++; else n1++;
+
+		int brute_near_tid = MeshQueries::FindNearestTriangle_LinearSearch(mesh, Vector3d(x, y, z));
+		if (near_tid != brute_near_tid)
+			fails++;
+	}
+	std::cout << "near0 " << n0 << " near1 " << n1 << " fails " << fails << std::endl;
 
 
 	Vector3d axis(0,0,1);
