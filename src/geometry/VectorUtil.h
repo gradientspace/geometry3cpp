@@ -227,6 +227,11 @@ namespace g3
 		return false;
 	}
 
+	template<typename T1, typename T2>
+	inline bool ContainsKey(const std::map<T1,T2> & dict, T1 value) {
+		return dict.find(value) != dict.end();
+	}
+
 	template<typename T>
 	inline bool Contains(const std::vector<T> & vec, T value) {
 		return std::find(vec.begin(), vec.end(), value) != vec.end();

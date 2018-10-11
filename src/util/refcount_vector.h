@@ -421,7 +421,7 @@ public:
     std::string UsageStats() {
 		std::ostringstream str;
 		str << "RefCountSize " << ref_counts.size() 
-			<< "  FreeSize" << free_indices.size() 
+			<< " FreeSize " << free_indices.size() 
 			<< " FreeMem " << (free_indices.byte_count() / 1024) << "kb";
 		return str.str();
     }
