@@ -17,6 +17,8 @@
 #include <DMesh3.h>
 #include <DMeshAABBTree3.h>
 #include <MeshQueries.h>
+#include <OBJReader.h>
+#include <OBJWriter.h>
 
 using namespace g3;
 
@@ -73,7 +75,7 @@ int main(int argc, char ** argv)
 
 	int n0 = 0, n1 = 0, fails = 0;
 	Wml::Mathd::IntervalRandom(-10, 10, 31337);
-	for (int k = 0; k < 1000; ++k) {
+	for (int k = 0; k < 1; ++k) {
 		double x = Wml::Mathd::IntervalRandom(-10, 10);
 		double y = Wml::Mathd::IntervalRandom(-10, 10);
 		double z = Wml::Mathd::IntervalRandom(-10, 10);
@@ -85,6 +87,28 @@ int main(int argc, char ** argv)
 			fails++;
 	}
 	std::cout << "near0 " << n0 << " near1 " << n1 << " fails " << fails << std::endl;
+
+
+	OBJReader reader;
+	DMesh3Builder builder;
+
+	std::ifstream input("c:\\scratch\\bunny_solid.obj");
+
+	//std::stringstream buffer;
+	//buffer << input.rdbuf();
+	//ParseUtil::Split(buffer.str(), '\n', reader.LINES, ParseUtil::Options::RemoveEmpty);
+	//input.seekg(0);
+
+	reader.Read(input, ReadOptions::Defaults(), builder);
+	std::cout << "read " << builder.Meshes.size() << " meshes" << std::endl;
+	auto mesh1 = builder.Meshes[0];
+	std::cout << mesh1->MeshInfoString();
+
+	std::ofstream output("c:\\scratch\\g3cpp_output.obj");
+	std::vector<WriteMesh> write_meshes;
+	write_meshes.push_back(WriteMesh(mesh1));
+	OBJWriter writer;
+	writer.Write(output, write_meshes, WriteOptions::Defaults());
 
 
 	Vector3d axis(0,0,1);
