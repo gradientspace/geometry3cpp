@@ -216,6 +216,21 @@ namespace g3
 		return (m1 - m2).cwiseAbs().maxCoeff() <= eps;
 	}
 
+
+	/// <summary>
+	/// compute vector in direction of triangle normal (cross-product). No normalization.
+	/// </summary>
+	/// <returns>The normal direction.</returns>
+	template <typename DerivedA, typename DerivedB, typename DerivedC>
+	inline auto FastNormalDirection(
+		const Eigen::MatrixBase<DerivedA> & v1, 
+		const Eigen::MatrixBase<DerivedB> & v2, 
+		const Eigen::MatrixBase<DerivedC> & v3)
+	{
+		return (v2 - v1).cross(v3 - v1);
+	}
+
+
 	template <typename DerivedA, typename T>
 	inline bool Contains(const Eigen::MatrixBase<DerivedA> & m1, T value)
 	{

@@ -39,3 +39,5 @@ g3External void g3_debugPrint(std::wstring fmt, ...);
 
 #define gDevAssertReturnOnFail(x, retval) if (!(x)) { gDevAssert(false); return (retval); }
 
+// TODO: https://stackoverflow.com/questions/173618/is-there-a-portable-equivalent-to-debugbreak-debugbreak
+#define gBreakToDebugger __debugbreak

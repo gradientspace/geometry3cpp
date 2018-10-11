@@ -6,6 +6,8 @@
 #include <OBJReader.h>
 #include <OBJWriter.h>
 #include <MeshConstraints.h>
+#include <MeshRefinerBase.h>
+#include <Remesher.h>
 
 using namespace g3;
 
@@ -19,4 +21,7 @@ static void test_mesh_classes()
 	OBJWriter writer;
 
 	MeshConstraints mc;
+	MeshRefinerBase refbase;
+
+	Remesher remesher(std::make_shared<DMesh3>());
 }

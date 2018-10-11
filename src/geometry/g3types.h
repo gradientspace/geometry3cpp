@@ -111,6 +111,9 @@ namespace g3
 	typedef Wml::Box3<float> Box3f;
 	typedef Wml::Box3<double> Box3d;
 
+	template<typename T> using Ray3 = Wml::Ray3<T>;
+	typedef Wml::Ray3<float> Ray3f;
+	typedef Wml::Ray3<double> Ray3d;
 
 	class GeometryAssembly;
 	typedef std::shared_ptr<GeometryAssembly> GeometryAssemblyPtr;
@@ -118,6 +121,14 @@ namespace g3
 	class DMesh3;
 	typedef std::shared_ptr<DMesh3> DMesh3Ptr;
 
+	class IProjectionTarget;
+	typedef std::shared_ptr<IProjectionTarget> IProjectionTargetPtr;
+
+	class MeshConstraints;
+	typedef std::shared_ptr<MeshConstraints> MeshConstraintsPtr;
+
+	class ProgressCancel;
+	typedef std::shared_ptr<ProgressCancel> ProgressCancelPtr;
 }
 
 // interface files
