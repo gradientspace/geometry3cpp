@@ -20,6 +20,7 @@
 #include <OBJReader.h>
 #include <OBJWriter.h>
 #include <Remesher.h>
+#include "profile_util.h"
 
 using namespace g3;
 
@@ -100,17 +101,23 @@ int main(int argc, char ** argv)
 	//ParseUtil::Split(buffer.str(), '\n', reader.LINES, ParseUtil::Options::RemoveEmpty);
 	//input.seekg(0);
 
+	BlockTimer read_timer("read", true);
 	reader.Read(input, ReadOptions::Defaults(), builder);
-	std::cout << "read " << builder.Meshes.size() << " meshes" << std::endl;
+	read_timer.Stop();
+	std::cout << "read " << builder.Meshes.size() << " meshes, took " << read_timer.ToString() << std::endl;
 	auto mesh1 = builder.Meshes[0];
 	std::cout << mesh1->MeshInfoString();
 
 	double cur_len = (mesh1->GetEdgePoint(0, 0) - mesh1->GetEdgePoint(0, 1)).norm();
 
+	BlockTimer remesh_timer("remesh", true);
 	Remesher r(mesh1);
-	r.SetTargetEdgeLength(cur_len / 2);
-	for (int k = 0; k < 10; ++k)
+	r.SetTargetEdgeLength(0.05);
+	for (int k = 0; k < 25; ++k)
 		r.BasicRemeshPass();
+	remesh_timer.Stop();
+	std::cout << "remesh took " << remesh_timer.ToString() << std::endl;
+
 
 	std::ofstream output("c:\\scratch\\g3cpp_output.obj");
 	std::vector<WriteMesh> write_meshes;
@@ -143,4 +150,5 @@ int main(int argc, char ** argv)
 	//std::vector<int> tris(nt*3);
 	//get_triangles(handle, nt*3, (unsigned int *)&tris[0]);
 
+	getchar();
 }
