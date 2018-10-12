@@ -13,7 +13,7 @@ g3cpp is intended to be a general-purpose high-level geometric computing package
 
 I would like the library to be a header-only library. *However* the WildMagic5 dependency is currently structured to produce a compiled DLL, and GTEngine is also not fully header-only, there are few .cpp files. My intention is to eventually refactor these libraries so that they are fully header-only as well. 
 
-
+*Note: I would welcome comments about whether a header-only approach is suitable/desirable for production use.*
 
 # Current State
 
@@ -50,9 +50,9 @@ a CMake build system is provided. Run top-level StartVS2017_Debug.bat or StartVS
 If you are actively working on the g3cpp code, UpdateVS_Debug_2017.bat will regenerate the solution file, which will cause VS2017 to prompt you to reload it. 
 
 
-# Build Output
+# Packaging / Build Output
 
-Currently a dll.
+Currently a dll. No packaging as of yet.
 
 
 # Testing
