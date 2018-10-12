@@ -2,23 +2,32 @@
 
 #include <DMesh3.h>
 #include <MeshQueries.h>
+#include <SpatialInterfaces.h>
 
 
 namespace g3
 {
 
-class DMeshAABBTree3
+
+class DMeshAABBTree3 : public IMeshSpatial
 {
 protected:
-	const DMesh3 & mesh;
+	DMesh3Ptr mesh;
 	int mesh_timestamp;
 	int TopDownLeafMaxTriCount = 4;
 
 public:
 	static constexpr double DOUBLE_MAX = std::numeric_limits<double>::max();
 
-	DMeshAABBTree3(const DMesh3 & m, bool autoBuild = false) : mesh(m)
+	/// <summary>
+	/// If non-null, only triangle IDs that pass this filter (ie filter is true) are considered
+	/// </summary>
+	std::function<bool(int)> TriangleFilterF = nullptr;
+
+
+	DMeshAABBTree3(DMesh3Ptr m, bool autoBuild = false)
 	{
+		mesh = m;
 		if (autoBuild)
 			Build();
 	}
@@ -27,19 +36,20 @@ public:
 	void Build()
 	{
 		build_top_down(false);
-		mesh_timestamp = mesh.ShapeTimestamp();
+		mesh_timestamp = mesh->ShapeTimestamp();
 	}
 
 
+	virtual bool SupportsNearestTriangle() override { return true; }
 
 
 	/// <summary>
 	/// Find the triangle closest to p, and distance to it, within distance fMaxDist, or return InvalidID
 	/// Use MeshQueries.TriangleDistance() to get more information
 	/// </summary>
-	virtual int FindNearestTriangle(const Vector3d & p, double & fNearestDistSqr, double fMaxDist = DOUBLE_MAX)
+	virtual int FindNearestTriangle(const Vector3d & p, double & fNearestDistSqr, double fMaxDist = DOUBLE_MAX) override
 	{
-		if (mesh_timestamp != mesh.ShapeTimestamp())
+		if (mesh_timestamp != mesh->ShapeTimestamp())
 			throw std::exception("DMeshAABBTree3.FindNearestTriangle: mesh has been modified since tree construction");
 
 		fNearestDistSqr = (fMaxDist < DOUBLE_MAX) ? fMaxDist * fMaxDist : DOUBLE_MAX;
@@ -54,9 +64,9 @@ public:
 			int num_tris = index_list[idx];
 			for (int i = 1; i <= num_tris; ++i) {
 				int ti = index_list[idx + i];
-				//if (TriangleFilterF != null && TriangleFilterF(ti) == false)
-				//	continue;
-				double fTriDistSqr = MeshQueries::TriDistanceSqr(mesh, ti, p);
+				if (TriangleFilterF != nullptr && TriangleFilterF(ti) == false)
+					continue;
+				double fTriDistSqr = MeshQueries::TriDistanceSqr(*mesh, ti, p);
 				if (fTriDistSqr < fNearestSqr) {
 					fNearestSqr = fTriDistSqr;
 					tID = ti;
@@ -99,6 +109,87 @@ public:
 
 
 
+	virtual bool SupportsTriangleRayIntersection() override { return false; }
+
+
+	virtual int FindNearestHitTriangle(const Ray3d & ray, double fMaxDist = std::numeric_limits<double>::max()) override 
+	{
+		return InvalidID;
+	}
+
+
+	virtual bool SupportsPointContainment() override { return false; }
+	
+	virtual bool IsInside(const Vector3d & p) override
+	{
+		return false;
+	}
+
+
+
+
+
+
+
+
+
+	class TreeTraversal
+	{
+	public:
+		// return false to terminate this branch
+		// arguments are box and depth in tree
+		std::function<bool(const AxisAlignedBox3d &, int)> NextBoxF = [](const AxisAlignedBox3d & box, int depth) { return true; };
+
+		std::function<void(int)> NextTriangleF = [](int tID) {};
+	};
+
+
+	/// <summary>
+	/// Hierarchically descend through the tree nodes, calling the TreeTrversal functions at each level
+	/// </summary>
+	virtual void DoTraversal(TreeTraversal * traversal)
+	{
+		if (mesh_timestamp != mesh->ShapeTimestamp())
+			throw std::exception("DMeshAABBTree3.FindNearestTriangle: mesh has been modified since tree construction");
+
+		tree_traversal(root_index, 0, traversal);
+	}
+
+	// traversal implementation. you can override to customize this if necessary.
+	virtual void tree_traversal(int iBox, int depth, TreeTraversal * traversal)
+	{
+		int idx = box_to_index[iBox];
+
+		if (idx < triangles_end) {
+			// triange-list case, array is [N t1 t2 ... tN]
+			int n = index_list[idx];
+			for (int i = 1; i <= n; ++i) {
+				int ti = index_list[idx + i];
+				if (TriangleFilterF != nullptr && TriangleFilterF(ti) == false)
+					continue;
+				traversal->NextTriangleF(ti);
+			}
+		}
+		else {
+			int i0 = index_list[idx];
+			if (i0 < 0) {
+				// negative index means we only have one 'child' box to descend into
+				i0 = (-i0) - 1;
+				if (traversal->NextBoxF(get_box(i0), depth + 1))
+					tree_traversal(i0, depth + 1, traversal);
+			}
+			else {
+				// positive index, two sequential child box indices to descend into
+				i0 = i0 - 1;
+				if (traversal->NextBoxF(get_box(i0), depth + 1))
+					tree_traversal(i0, depth + 1, traversal);
+				int i1 = index_list[idx + 1] - 1;
+				if (traversal->NextBoxF(get_box(i1), depth + 1))
+					tree_traversal(i1, depth + 1, traversal);
+			}
+		}
+	}
+
 
 
 
@@ -109,13 +200,32 @@ protected:
 	// Internals - data structures, construction, etc
 	//
 
-	double box_distance_sqr(int iBox, const Vector3d & p)
+	AxisAlignedBox3d get_box(int iBox)
+	{
+		const Vector3d & c = box_centers[iBox];
+		const Vector3d & e = box_extents[iBox];
+		Vector3d Min = c - e, Max = c + e;
+		return AxisAlignedBox3d(Min.data(), Max.data());
+	}
+
+	AxisAlignedBox3d get_box_eps(int iBox, double epsilon = Wml::Mathd::ZERO_TOLERANCE)
+	{
+		const Vector3d & c = box_centers[iBox];
+		Vector3d e = box_extents[iBox]; 
+		e[0] += epsilon; e[1] += epsilon; e[2] += epsilon;
+		Vector3d Min = c - e, Max = c + e;
+		return AxisAlignedBox3d(Min.data(), Max.data());
+	}
+
+
+	double box_distance_sqr(int iBox, const Vector3d & v)
 	{
 		const Vector3d & c = box_centers[iBox];
 		const Vector3d & e = box_extents[iBox];
 
 		// per-axis delta is max(abs(p-c) - e, 0)... ?
-		return ((p - c).cwiseAbs() - e).cwiseMax(0).squaredNorm();
+		double dist_sqr = ((v - c).cwiseAbs() - e).cwiseMax(0).squaredNorm();
+		return dist_sqr;
 	}
 
 
@@ -167,16 +277,16 @@ protected:
 		// build list of valid triangles & centers. We skip any
 		// triangles that have infinite/garbage vertices...
 		int i = 0;
-		std::vector<int> triangles(mesh.TriangleCount());
-		std::vector<Vector3d> centers(mesh.TriangleCount());
-		for (int ti : mesh.TriangleIndices()) {
-			Vector3d centroid = mesh.GetTriCentroid(ti);
+		std::vector<int> triangles(mesh->TriangleCount());
+		std::vector<Vector3d> centers(mesh->TriangleCount());
+		for (int ti : mesh->TriangleIndices()) {
+			Vector3d centroid = mesh->GetTriCentroid(ti);
 			double d2 = centroid.squaredNorm();
 			bool bInvalid = isnan(d2) || (isfinite(d2) == false);
 			gDevAssert(bInvalid == false);
 			if (bInvalid == false) {
 				triangles[i] = ti;
-				centers[i] = mesh.GetTriCentroid(ti);
+				centers[i] = mesh->GetTriCentroid(ti);
 				i++;
 			} // otherwise skip this tri
 		}
@@ -185,8 +295,8 @@ protected:
 		boxes_set nodes;
 		AxisAlignedBox3d rootBox;
 		int rootnode = 
-			//(bSorted) ? split_tri_set_sorted(triangles, centers, 0, mesh.TriangleCount, 0, TopDownLeafMaxTriCount, tris, nodes, out rootBox) :
-			split_tri_set_midpoint(triangles, centers, 0, mesh.TriangleCount(), 0, TopDownLeafMaxTriCount, tris, nodes, rootBox);
+			//(bSorted) ? split_tri_set_sorted(triangles, centers, 0, mesh->TriangleCount, 0, TopDownLeafMaxTriCount, tris, nodes, out rootBox) :
+			split_tri_set_midpoint(triangles, centers, 0, mesh->TriangleCount(), 0, TopDownLeafMaxTriCount, tris, nodes, rootBox);
 
 		box_to_index = tris.box_to_index;
 		box_centers = tris.box_centers;
@@ -240,7 +350,7 @@ protected:
 			tris.index_list.insertAt(iCount, tris.iIndicesCur++);
 			for (int i = 0; i < iCount; ++i) {
 				tris.index_list.insertAt(triangles[iStart + i], tris.iIndicesCur++);
-				box.Contain(mesh.GetTriBounds(triangles[iStart + i]));
+				box.Contain(mesh->GetTriBounds(triangles[iStart + i]));
 			}
 
 			tris.box_centers.insertAt(box.Center(), iBox);
@@ -307,12 +417,109 @@ protected:
 	}
 
 
+
+
+public:
+
+	// 1) make sure we can reach every tri in mesh through tree (also demo of how to traverse tree...)
+	// 2) make sure that triangles are contained in parent boxes
+	void TestCoverage()
+	{
+		std::vector<int> tri_counts(mesh->MaxTriangleID());
+		std::fill(tri_counts.begin(), tri_counts.end(), 0);
+
+		std::vector<int> parent_indices(box_to_index.size());
+		std::fill(parent_indices.begin(), parent_indices.end(), 0);
+
+		test_coverage(tri_counts, parent_indices, root_index);
+
+		for (int ti : mesh->TriangleIndices()) {
+			if (tri_counts[ti] != 1)
+				gBreakToDebugger();
+		}
+	}
+
+private:
+
+	// accumulate triangle counts and track each box-parent index. 
+	// also checks that triangles are contained in boxes
+	void test_coverage(std::vector<int> & tri_counts, std::vector<int> & parent_indices, int iBox)
+	{
+		int idx = box_to_index[iBox];
+
+		debug_check_child_tris_in_box(iBox);
+
+		if (idx < triangles_end) {
+			// triange-list case, array is [N t1 t2 ... tN]
+			int n = index_list[idx];
+			AxisAlignedBox3d box = get_box_eps(iBox);
+			for (int i = 1; i <= n; ++i) {
+				int ti = index_list[idx + i];
+				tri_counts[ti]++;
+
+				Index3i tv = mesh->GetTriangle(ti);
+				for (int j = 0; j < 3; ++j) {
+					Vector3d v = mesh->GetVertex(tv[j]);
+					if ( ! box.Contains(v) )
+						gBreakToDebugger();
+				}
+			}
+
+		}
+		else {
+			int i0 = index_list[idx];
+			if (i0 < 0) {
+				// negative index means we only have one 'child' box to descend into
+				i0 = (-i0) - 1;
+				parent_indices[i0] = iBox;
+				test_coverage(tri_counts, parent_indices, i0);
+			}
+			else {
+				// positive index, two sequential child box indices to descend into
+				i0 = i0 - 1;
+				parent_indices[i0] = iBox;
+				test_coverage(tri_counts, parent_indices, i0);
+				int i1 = index_list[idx + 1];
+				i1 = i1 - 1;
+				parent_indices[i1] = iBox;
+				test_coverage(tri_counts, parent_indices, i1);
+			}
+		}
+	}
+	// do full tree traversal below iBox and make sure that all triangles are further
+	// than box-distance-sqr
+	void debug_check_child_tri_distances(int iBox, const Vector3d & p)
+	{
+		double fBoxDistSqr = box_distance_sqr(iBox, p);
+
+		// [TODO]
+		TreeTraversal * t = new TreeTraversal();
+		t->NextTriangleF = [&](int tID) {
+			double fTriDistSqr = MeshQueries::TriDistanceSqr(*mesh, tID, p);
+			if (fTriDistSqr < fBoxDistSqr)
+				if (fabs(fTriDistSqr - fBoxDistSqr) > Wml::Mathd::ZERO_TOLERANCE * 100)
+					gBreakToDebugger();
+		};
+		tree_traversal(iBox, 0, t);
+	}
+
+	// do full tree traversal below iBox to make sure that all child triangles are contained
+	void debug_check_child_tris_in_box(int iBox)
+	{
+		AxisAlignedBox3d box = get_box_eps(iBox);
+		TreeTraversal * t = new TreeTraversal(); 
+		t->NextTriangleF = [&](int tID) {
+			Index3i tv = mesh->GetTriangle(tID);
+			for (int j = 0; j < 3; ++j) {
+				Vector3d v = mesh->GetVertex(tv[j]);
+				if (box.Contains(v) == false)
+					gBreakToDebugger();
+			}
+		};
+		tree_traversal(iBox, 0, t);
+	}
+
+
 };
-
-
-
-
-
-
 
 }
