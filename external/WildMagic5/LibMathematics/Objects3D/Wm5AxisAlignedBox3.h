@@ -70,7 +70,7 @@ public:
 	Real Volume() const;
 	void Contain(const Vector3<Real> & v);
 	void Contain(const AxisAlignedBox3<Real> & o);
-	bool Contained(const Vector3<Real> & v) const;
+	bool Contains(const Vector3<Real> & v) const;
 	void Expand(Real f);
 	void Translate(const Vector3<Real> & v);
 

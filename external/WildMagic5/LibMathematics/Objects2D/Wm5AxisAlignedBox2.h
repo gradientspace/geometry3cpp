@@ -65,7 +65,7 @@ public:
 	Real Volume() const;
 	void Contain(const Vector2<Real> & v);
 	void Contain(const AxisAlignedBox2<Real> & o);
-	bool Contained(const Vector2<Real> & v) const;
+	bool Contains(const Vector2<Real> & v) const;
 	void Expand(Real f);
 	void Translate(const Vector2<Real> & v);
 

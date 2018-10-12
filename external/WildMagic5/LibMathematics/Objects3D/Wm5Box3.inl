@@ -145,7 +145,7 @@ void Box3<Real>::Contain(const Box3<Real> & o)
 
 
 template <typename Real>
-bool Box3<Real>::Contained(const Vector3<Real> & v) const
+bool Box3<Real>::Contains(const Vector3<Real> & v) const
 {
 	Vector3<Real> lv = v - Center;
 	return (fabs(lv.Dot(Axis[0])) <= Extent[0]) &&

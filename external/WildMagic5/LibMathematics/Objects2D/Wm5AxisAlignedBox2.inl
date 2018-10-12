@@ -182,7 +182,7 @@ void AxisAlignedBox2<Real>::Contain(const AxisAlignedBox2<Real> & o)
 
 
 template <typename Real>
-bool AxisAlignedBox2<Real>::Contained(const Vector2<Real> & v) const
+bool AxisAlignedBox2<Real>::Contains(const Vector2<Real> & v) const
 {
 	return (v[0] >= Min[0] && v[0] <= Max[0]
 		&& v[1] >= Min[1] && v[1] <= Max[1]);
