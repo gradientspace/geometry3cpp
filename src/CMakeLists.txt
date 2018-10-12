@@ -9,6 +9,8 @@ file ( GLOB g3_cinterface "cinterface/*.*" )
 
 
 add_library ( geometry3 SHARED ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
+# [RMS] use this line to build static lib instead, but doesn't work right now due to gDevAssert?
+#add_library ( geometry3 ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
 SET_TARGET_PRECOMPILED_HEADER ( geometry3 geometry3PCH.h geometry3PCH.cpp )
 
 

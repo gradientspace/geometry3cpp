@@ -27,8 +27,9 @@
 #endif
 
 
-
+// rename Wm5 namespace because Wml is what I am used to and it's faster to type
 namespace Wml = Wm5;
+
 
 namespace g3 
 {
