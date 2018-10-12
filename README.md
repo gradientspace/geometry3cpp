@@ -26,7 +26,7 @@ The dependencies contain an enormous amount of functionality, much more than geo
 
 **Old Code** This repository has evolved from an earlier attempt (pre-geometry3Sharp) at a mesh processing library. This previous code has not been fully deleted/updated, but will be. 
 
-**goemetry3_tests** project has some basic sample code. It is included in the CMake generators but is a separate executable
+**goemetry3_tests** project has some basic sample code in **main.cpp**. The CMake generators add this as a separate project, and it generates a standalone executable linking to g3Cpp. If you want to just try something out, I would recommend starting here.
 
 
 # Dependencies
