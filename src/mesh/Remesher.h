@@ -2,6 +2,7 @@
 
 #include <MeshRefinerBase.h>
 #include <SpatialInterfaces.h>
+#include <BasicProjectionTargets.h>
 #include <MeshUtil.h>
 
 namespace g3
@@ -91,6 +92,7 @@ public:
 
     IProjectionTargetPtr ProjectionTarget() { return this->target; }
     void SetProjectionTarget(IProjectionTargetPtr target) { this->target = target; }
+	void SetProjectionTarget(MeshProjectionTargetPtr target) { this->target = std::dynamic_pointer_cast<IProjectionTarget>(target); }
 
         
     /// <summary>

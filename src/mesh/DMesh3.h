@@ -468,7 +468,7 @@ public:
     }
 
 
-    void Copy(DMesh3 copy, bool bNormals = true, bool bColors = true, bool bUVs = true)
+    void Copy(const DMesh3 & copy, bool bNormals = true, bool bColors = true, bool bUVs = true)
     {
         vertices = dvector<double>(copy.vertices);
 

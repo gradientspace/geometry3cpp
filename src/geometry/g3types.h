@@ -115,6 +115,10 @@ namespace g3
 	typedef Wml::Ray3<float> Ray3f;
 	typedef Wml::Ray3<double> Ray3d;
 
+	template<typename T> using Triangle3 = Wml::Triangle3<T>;
+	typedef Wml::Triangle3<float> Triangle3f;
+	typedef Wml::Triangle3<double> Triangle3d;
+
 	class GeometryAssembly;
 	typedef std::shared_ptr<GeometryAssembly> GeometryAssemblyPtr;
 
@@ -123,6 +127,12 @@ namespace g3
 
 	class IProjectionTarget;
 	typedef std::shared_ptr<IProjectionTarget> IProjectionTargetPtr;
+
+	class MeshProjectionTarget;
+	typedef std::shared_ptr<MeshProjectionTarget> MeshProjectionTargetPtr;
+
+	class IMeshSpatial;
+	typedef std::shared_ptr<IMeshSpatial> IMeshSpatialPtr;
 
 	class MeshConstraints;
 	typedef std::shared_ptr<MeshConstraints> MeshConstraintsPtr;
