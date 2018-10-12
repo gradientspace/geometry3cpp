@@ -168,18 +168,18 @@ namespace g3
 	}
 
 
-	inline AxisAlignedBox2f d2f(const AxisAlignedBox2d & v) {
-		return AxisAlignedBox2f((float)v.Min[0], (float)v.Max[0], (float)v.Min[1], (float)v.Max[1] ); 
-	}
-	inline AxisAlignedBox3f d2f(const AxisAlignedBox3d & v) {
-		return AxisAlignedBox3f((float)v.Min[0], (float)v.Max[0], (float)v.Min[1], (float)v.Max[1], (float)v.Min[2], (float)v.Max[2] ); 
-	}
-	inline AxisAlignedBox2d f2d(const AxisAlignedBox2f & v) {
-		return AxisAlignedBox2d((double)v.Min[0], (double)v.Max[0], (double)v.Min[1], (double)v.Max[1]); 
-	}
-	inline AxisAlignedBox3d f2d(const AxisAlignedBox3f & v) {
-		return AxisAlignedBox3d((double)v.Min[0], (double)v.Max[0], (double)v.Min[1], (double)v.Max[1], (double)v.Min[2], (double)v.Max[2]);
-	}
+	//inline AxisAlignedBox2f d2f(const AxisAlignedBox2d & v) {
+	//	return AxisAlignedBox2f((float)v.Min[0], (float)v.Max[0], (float)v.Min[1], (float)v.Max[1] ); 
+	//}
+	//inline AxisAlignedBox3f d2f(const AxisAlignedBox3d & v) {
+	//	return AxisAlignedBox3f((float)v.Min[0], (float)v.Max[0], (float)v.Min[1], (float)v.Max[1], (float)v.Min[2], (float)v.Max[2] ); 
+	//}
+	//inline AxisAlignedBox2d f2d(const AxisAlignedBox2f & v) {
+	//	return AxisAlignedBox2d((double)v.Min[0], (double)v.Max[0], (double)v.Min[1], (double)v.Max[1]); 
+	//}
+	//inline AxisAlignedBox3d f2d(const AxisAlignedBox3f & v) {
+	//	return AxisAlignedBox3d((double)v.Min[0], (double)v.Max[0], (double)v.Min[1], (double)v.Max[1], (double)v.Min[2], (double)v.Max[2]);
+	//}
 
 
 	template<class Real>

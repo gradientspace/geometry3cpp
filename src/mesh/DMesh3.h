@@ -993,7 +993,7 @@ public:
             if (y < miny) miny = y; else if (y > maxy) maxy = y;
             if (z < minz) minz = z; else if (z > maxz) maxz = z;
         }
-        return AxisAlignedBox3d(minx, miny, minz, maxx, maxy, maxz);
+		return AxisAlignedBox3d(Wml::Vector3d(minx, miny, minz), Wml::Vector3d(maxx, maxy, maxz));
     }
 
 
@@ -2192,7 +2192,7 @@ public:
             if (y < miny) miny = y; else if (y > maxy) maxy = y;
             if (z < minz) minz = z; else if (z > maxz) maxz = z;
         }
-        return AxisAlignedBox3d(minx, miny, minz, maxx, maxy, maxz);
+        return AxisAlignedBox3d(Wml::Vector3d(minx, miny,minz), Wml::Vector3d(maxx, maxy, maxz));
     }
 
     AxisAlignedBox3d cached_bounds;
