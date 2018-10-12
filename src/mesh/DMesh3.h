@@ -1,6 +1,7 @@
 #pragma once
 
 #include <g3types.h>
+#include <Frame3.h>
 
 #include <string>
 #include <map>
@@ -150,9 +151,9 @@ public:
 	static constexpr int InvalidID = -1;
 	static constexpr int NonManifoldID = -2;
 
-	static const Vector3d InvalidVertex;
-	static const Index3i InvalidTriangle;
-	static const Index2i InvalidEdge;
+	static Vector3d InvalidVertex() { return Vector3d(max_double, 0, 0); }
+	static Index3i InvalidTriangle() { return Index3i(InvalidID, InvalidID, InvalidID); }
+	static Index2i InvalidEdge() { return Index2i(InvalidID, InvalidID); }
 
 
 protected:
@@ -817,7 +818,7 @@ public:
             }
             return nbr_t;
         } else
-            return InvalidTriangle;
+            return InvalidTriangle();
     }
 
     //IEnumerable<int> TriTrianglesItr(int tID) {
@@ -1118,7 +1119,7 @@ public:
             }
         }
         gDevAssert(false);
-        return InvalidEdge;
+        return InvalidEdge();
     }
 			
     // average of 1 or 2 face normals

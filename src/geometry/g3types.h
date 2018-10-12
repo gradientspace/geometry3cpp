@@ -146,7 +146,7 @@ namespace g3
 
 
 // [RMS] why is this here? doesn't seem like a good idea...
-#include <Frame3.h>
+//#include <Frame3.h>
 
 
 std::ostream& operator<<(std::ostream& os, const g3::Vector2f & v);

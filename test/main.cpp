@@ -27,19 +27,6 @@ using namespace g3;
 
 int main(int argc, char ** argv) 
 {
-	refcount_vector rcvec1;
-	small_list_set smalls;
-	
-	smalls.Resize(100);
-
-	smalls.AllocateAt(7);
-	//for (int k = 0; k <= 12; ++k)
-	//	smalls.Insert(7, k);
-
-	for (int value : smalls.values(7, [](int a) { return a + 10; }) ) {
-		std::cout << "value: " << value << std::endl;
-	}
-
 	DMesh3 mesh;
 	mesh.AppendVertex(Vector3d(0, 0, 0));
 	mesh.AppendVertex(Vector3d(1, 0, 0));
@@ -55,7 +42,6 @@ int main(int argc, char ** argv)
 	for (Vector3d v : mesh.Vertices()) {
 		std::cout << v[0] << " " << v[1] << " " << v[2] << std::endl;
 	}
-
 	for (Index3i t : mesh.Triangles()) {
 		std::cout << t[0] << " " << t[1] << " " << t[2] << std::endl;
 	}
