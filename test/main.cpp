@@ -20,6 +20,7 @@
 #include <OBJReader.h>
 #include <OBJWriter.h>
 #include <Remesher.h>
+#include <BasicProjectionTargets.h>
 #include "profile_util.h"
 
 using namespace g3;
@@ -72,7 +73,9 @@ int main(int argc, char ** argv)
 		std::cout << std::endl;
 	}
 
-	DMeshAABBTree3 spatial(mesh, true);
+	DMeshAABBTree3 spatial(std::make_shared<DMesh3>(mesh) , true);
+	spatial.Build();
+	spatial.TestCoverage();
 	double fNearDistSqr;
 
 	int n0 = 0, n1 = 0, fails = 0;
@@ -110,8 +113,14 @@ int main(int argc, char ** argv)
 
 	double cur_len = (mesh1->GetEdgePoint(0, 0) - mesh1->GetEdgePoint(0, 1)).norm();
 
+	DMeshAABBTree3 spatialTest(mesh1, true);
+	spatialTest.Build();
+	spatialTest.TestCoverage();
+
 	BlockTimer remesh_timer("remesh", true);
 	Remesher r(mesh1);
+	r.SetProjectionTarget(MeshProjectionTarget::AutoPtr(mesh1, true));
+	r.SmoothSpeedT = 1.0;
 	r.SetTargetEdgeLength(0.05);
 	for (int k = 0; k < 25; ++k)
 		r.BasicRemeshPass();
@@ -149,6 +158,8 @@ int main(int argc, char ** argv)
 
 	//std::vector<int> tris(nt*3);
 	//get_triangles(handle, nt*3, (unsigned int *)&tris[0]);
+
+	std::cout << "done! press any key";
 
 	getchar();
 }
