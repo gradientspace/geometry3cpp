@@ -4,7 +4,7 @@ Open-Source (Boost-license) C++ library for geometric computing.
 
 geometry3 is an in-progress port of [geometry3Sharp](https://github.com/gradientspace/geometry3Sharp), the gradientspace C# library for geometric computing. Except the parts of that library that were ported from the C++ WildMagic/GTEngine libraries, which are included in this one. It's a bit confusing.
 
-** WORK IN PROGRESS - HARDLY TESTED - BUYER BEWARE **
+**WORK IN PROGRESS - HARDLY TESTED - BUYER BEWARE**
 
 
 # Goals
