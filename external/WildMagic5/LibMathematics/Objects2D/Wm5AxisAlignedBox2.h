@@ -23,8 +23,13 @@ public:
     AxisAlignedBox2 ();  // uninitialized
     ~AxisAlignedBox2 ();
 
+
     // The caller must ensure that xmin <= xmax and ymin <= ymax.
-    AxisAlignedBox2 (Real xmin, Real xmax, Real ymin, Real ymax);
+private:
+	// [RMSG3] disabling this constructor because order of args is different than
+	// in g3Sharp. Use Vector3 version instead
+	AxisAlignedBox2 (Real xmin, Real xmax, Real ymin, Real ymax);
+public:
 
 	AxisAlignedBox2(const Real pMin[2], const Real pMax[2]);
 
