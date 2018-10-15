@@ -52,7 +52,11 @@ If you are actively working on the g3cpp code, UpdateVS_Debug_2017.bat will rege
 
 # Packaging / Build Output
 
-Currently a dll. No packaging as of yet.
+Currently a dll, output to visual studio build folders, ie *build\Win64_Debug* or *_Release*. 
+
+You can switch to a static .lib by editing *src\CMakeLists.txt* and commenting/uncommenting the relevant block (see comments in file)
+
+No packaging as of yet. You will have to add the various header source folders to other projects. Sorry!! (happy to take PRs here!)
 
 
 # Testing

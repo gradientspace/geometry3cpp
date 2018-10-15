@@ -1,19 +1,6 @@
 #pragma once
 
-
-// [TODO] move this declaration into a header that g3Types includes!
-#ifndef g3External
-#ifdef WIN32
-#ifdef GEOMETRY3_DLL_EXPORT
-#define g3External   __declspec( dllexport )
-#else
-#define g3External   __declspec( dllimport )
-#endif
-#else
-#define g3External
-#endif
-#endif
-
+#include <g3Config.h>
 
 
 namespace g3

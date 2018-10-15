@@ -16,16 +16,7 @@
 #include <memory>
 #include <limits>
 
-#ifdef WIN32
-    #ifdef GEOMETRY3_DLL_EXPORT
-    #define g3External   __declspec( dllexport )
-    #else
-    #define g3External   __declspec( dllimport )
-    #endif
-#else
-    #define g3External
-#endif
-
+#include <g3Config.h>
 
 // rename Wm5 namespace because Wml is what I am used to and it's faster to type
 namespace Wml = Wm5;
