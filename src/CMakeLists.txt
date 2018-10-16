@@ -14,13 +14,13 @@ file ( GLOB g3_cinterface "cinterface/*.*" )
 #
 
 # [RMS] UNCOMMENT THESE LINES FOR DLL BUILD
-add_library ( geometry3 SHARED ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
-target_compile_definitions(geometry3 PRIVATE GEOMETRY3_DLL_EXPORT)
-target_compile_definitions(geometry3 INTERFACE GEOMETRY3_DLL_IMPORT)
+# add_library ( geometry3 SHARED ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
+# target_compile_definitions(geometry3 PRIVATE GEOMETRY3_DLL_EXPORT)
+# target_compile_definitions(geometry3 INTERFACE GEOMETRY3_DLL_IMPORT)
 
 # [RMS] UNCOMMENT FOR STATIC LIBRARY BUILD
-#add_library ( geometry3 ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
-#target_compile_definitions(geometry3 PUBLIC G3_STATIC_LIB)
+add_library ( geometry3 ${g3_geomroot} ${g3_geom} ${g3_util} ${g3_mesh} ${g3_spatial} ${g3_cinterface} )
+target_compile_definitions(geometry3 PUBLIC G3_STATIC_LIB)
 
 
 # OK DONE THAT
