@@ -18,7 +18,7 @@ public:
 	DMesh3Ptr Mesh;
 	IMeshSpatialPtr Spatial;
 
-	MeshProjectionTarget() { }
+	~MeshProjectionTarget() {}
 
 	MeshProjectionTarget(DMesh3Ptr mesh, IMeshSpatialPtr spatial)
 	{

@@ -8,6 +8,9 @@ namespace g3
 
 class ISpatial
 {
+public:
+	virtual ~ISpatial() {}
+
 	virtual bool SupportsPointContainment() = 0;
 
 	/// <summary> return true if query point is inside object </summary>
@@ -19,6 +22,8 @@ class ISpatial
 class IMeshSpatial : public ISpatial
 {
 public:
+	virtual ~IMeshSpatial() {}
+
 	virtual bool SupportsNearestTriangle() = 0;
 
 	/// <summary>
@@ -39,18 +44,25 @@ public:
 class IProjectionTarget
 {
 public:
+	virtual ~IProjectionTarget() {}
+
 	virtual Vector3d Project(const Vector3d & vPoint, int identifier = -1) = 0;
 };
 
 class IOrientedProjectionTarget : public IProjectionTarget
 {
 public:
+	virtual ~IOrientedProjectionTarget() {}
+
+	virtual Vector3d Project(const Vector3d & vPoint, int identifier = -1) override = 0;
 	virtual Vector3d Project(const Vector3d & vPoint, Vector3d & vProjectNormal, int identifier = -1) = 0;
 };
 
 class IIntersectionTarget
 {
 public:
+	virtual ~IIntersectionTarget() {}
+
 	virtual bool HasNormal() = 0;
 	virtual bool RayIntersect(const Ray3d & ray, Vector3d & vHit, Vector3d & vHitNormal) = 0;
 };

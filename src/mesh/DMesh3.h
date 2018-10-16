@@ -188,6 +188,8 @@ protected:
     //Dictionary<string, object> Metadata = nullptr;
 
 public:
+	virtual ~DMesh3() { }   // no pointer members!
+
     DMesh3(bool bWantNormals = true, bool bWantColors = false, bool bWantUVs = false, bool bWantTriGroups = false)
     {
         vertices = dvector<double>();
@@ -3148,8 +3150,8 @@ public:
 
 
 	void debug_fail(const std::string & s) {
-	#if DEBUG
-		System.Console.WriteLine("DMesh3.CollapseEdge: check failed: " + s);
+	#ifdef DEBUG
+		//System.Console.WriteLine("DMesh3.CollapseEdge: check failed: " + s);
 		gDevAssert(false);
 		//throw Exception("DMesh3.CollapseEdge: check failed: " + s);
 	#endif

@@ -31,6 +31,8 @@ public:
 		diffuse_color = InvalidColor();
 		alpha = Invalidf;
 	}
+
+	virtual ~GenericMaterial() {}
 };
 typedef std::shared_ptr<GenericMaterial> GenericMaterialPtr;
 
@@ -78,6 +80,8 @@ public:
 		illum = -1;
 		d = Ns = sharpness = Ni = Invalidf;
 	}
+
+	virtual ~OBJMaterial() {}
 
 	virtual Vector3f DiffuseColor() {
 		return (Kd == InvalidColor()) ? Vector3f(1, 1, 1) : Kd;;

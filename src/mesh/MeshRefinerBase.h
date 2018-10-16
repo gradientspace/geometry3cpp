@@ -41,6 +41,7 @@ public:
     MeshRefinerBase() {
     }
 
+	virtual ~MeshRefinerBase() {}
 
     DMesh3Ptr Mesh() { return mesh; }
 	MeshConstraintsPtr Constraints() { return constraints; }
