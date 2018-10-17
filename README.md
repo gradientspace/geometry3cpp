@@ -45,7 +45,11 @@ All dependencies are included in the repository, for convenience.
 
 **Currently only definitely working on Windows, but the code should be portable..."should"...***
 
-a CMake build system is provided. Run top-level StartVS2017_Debug.bat or StartVS2017_Release.bat to automatically run CMake and open the resulting VS2017 solution. 
+1) Run **bin\get_cmake.bat** to download and unzip the required version of CMake. This will be unzipped in bin\cmake_win, it will not affect your system installation of CMake (if installed). 
+
+2) Run **external\cmake_install_eigen.bat**. This does some cmake stuff so that the Eigen CMake module can be found. Again, it doesn't affect any other Eigen installations/etc. *(Not entirely clear why this is necessary, but CMake cannot find Eigen without it)*
+
+3) Run top-level **StartVS2017_Debug.bat** or **StartVS2017_Release.bat** to run CMake and automatically open the resulting VS2017 solution. 
 
 If you are actively working on the g3cpp code, UpdateVS_Debug_2017.bat will regenerate the solution file, which will cause VS2017 to prompt you to reload it. 
 
