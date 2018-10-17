@@ -2,12 +2,6 @@
 bin/cmake_win/*
 build/*
 
-
-external/Eigen/doc/
-external/Eigen/demos/
-external/Eigen/failtest/
-external/Eigen/test/
-external/Eigen/bench/
-external/Eigen/unsupported/test/
 /**/#*#
+
 external/eigen_install/
