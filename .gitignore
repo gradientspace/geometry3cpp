@@ -10,3 +10,4 @@ external/Eigen/test/
 external/Eigen/bench/
 external/Eigen/unsupported/test/
 /**/#*#
+external/eigen_install/
