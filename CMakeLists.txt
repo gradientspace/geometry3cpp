@@ -10,6 +10,9 @@ project (geometry3)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# to let us find custom packages - currently LibIGL
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 
 # PCH macros:
 #  - SET_TARGET_PRECOMPILED_HEADER ( target pch.h pch.cpp )
@@ -72,8 +75,14 @@ set ( F3TBB_Include ${F3TBB_Root}/include )
 
 
 
-# Eigen?
+# find Eigen module
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
+
+# find libigl module
+#set ( G3IGL_Root ${CMAKE_CURRENT_SOURCE_DIR}/external/libigl )
+#set ( G3IGL_Include ${G3IGL_Root}/include )
+find_package(LIBIGL REQUIRED QUIET)
 
 
 

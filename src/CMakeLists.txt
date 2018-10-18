@@ -41,6 +41,7 @@ target_link_libraries ( geometry3 WmlCore )
 target_link_libraries ( geometry3 WmlMathematics )
 
 target_link_libraries ( geometry3 Eigen3::Eigen)
+target_link_libraries ( geometry3 igl::core )
 
 
 source_group ( "util" FILES ${g3_util} )
