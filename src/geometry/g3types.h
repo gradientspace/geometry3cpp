@@ -6,7 +6,6 @@
  *   are only included further down...
  */
 
-#define EIGEN_MATRIXBASE_PLUGIN "eigen_MatrixBase_AddOns.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>   // required for MatrixBase.cross()  !!
 
