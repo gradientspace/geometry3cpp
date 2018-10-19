@@ -1,8 +1,8 @@
 # geometry3cpp
 
-Open-Source (Boost-license) C++ library for geometric computing. 
+Open-Source (Boost-license) C++11 library for geometric computing. 
 
-geometry3cpp is an in-progress port of [geometry3Sharp](https://github.com/gradientspace/geometry3Sharp), the gradientspace C# library for geometric computing. Except the parts of that library that were ported from the C++ WildMagic/GTEngine libraries, which are included in this one. It's a bit confusing.
+geometry3cpp is an in-progress port of [geometry3Sharp](https://github.com/gradientspace/geometry3Sharp), the gradientspace C# library for geometric computing. (Except the parts of that library that were ported from the C++ WildMagic/GTEngine libraries, we just use those directly)
 
 **WORK IN PROGRESS - HARDLY TESTED - BUYER BEWARE**
 
@@ -11,7 +11,7 @@ geometry3cpp is an in-progress port of [geometry3Sharp](https://github.com/gradi
 
 g3cpp is intended to be a general-purpose high-level geometric computing package, with a focus on triangle mesh processing. It includes *other* math libraries which provide most of the low-level vector math stuff, solvers, etc. 
 
-I would like the library to be a header-only library. *However* the WildMagic5 dependency is currently structured to produce a compiled DLL, and GTEngine is also not fully header-only, there are few .cpp files. My intention is to eventually refactor these libraries so that they are fully header-only as well. 
+I would like the library to be a header-only library. *However* the WildMagic5 dependency is currently structured to produce a compiled library, and GTEngine is also not fully header-only, there are few .cpp files. My intention is to eventually refactor these libraries so that they are fully header-only as well. 
 
 *Note: I would welcome comments about whether a header-only approach is suitable/desirable for production use.*
 
@@ -21,7 +21,7 @@ The dependencies contain an enormous amount of functionality, much more than geo
 
 * **DMesh3** - dynamic mesh, fully ported
 * **DMeshAABBTree3** - AABB bounding volume hierarchy for DMesh3, only nearest-point and generic traversal currently ported
-* **Remesher** - majority ported, no parallel smoothing/projection currently (avoiding tbb dependency for now)
+* **Remesher** - majority ported, no parallel smoothing/projection currently
 * **OBJReader** and **OBJWriter** - functional but support for materials/texture maps is not fully ported
 
 **Old Code** This repository has evolved from an earlier attempt (pre-geometry3Sharp) at a mesh processing library. This previous code has not been fully deleted/updated, but will be. 
@@ -39,6 +39,7 @@ All dependencies are included in the repository, for convenience.
 
 3) **GTEngine** also from [GeometricTools](https://www.geometrictools.com/) and written by David Eberly. **Boost License**. Only the Math parts, again. This is the "next version" of WildMagic5, however quite a few of the classes from Wm5 were not ported. However it has some new things like Constrained Delaunay. So both are included. The source is included in */external/GTEngine*. Namespace for this one is "gte". *(Currently not actually called by the g3cpp code, but it will be)
 
+4) [**libigl**](https://libigl.github.io/), the C++ header-only mesh/geometry processing library. libigl is built on Eigen and has implementations of most standard geometry processing algorithms/techniques. Source is included in */external/libigl*. **MPL2 License** is used for the core library, and this is all that geometry3cpp will call. However the code includes calls to various other libaries, including CGAL, LGPL/GPL-licensed code, etc. These will not be included in your binaries unless you explicitly call them via the **igl::copyleft::** namespace. 
 
 
 # Building
@@ -66,3 +67,16 @@ No packaging as of yet. You will have to add the various header source folders t
 # Testing
 
 There isn't any, yet.
+
+# libigl interop
+
+Since libigl also uses Eigen, many things are compatible. The main interop required is in passing meshes between the libraries. libigl uses Nx3 Eigen matrices for vertices and triangles (Eigen::MatrixXd and MatrixXi, respectively). [More details in their tutorial](https://libigl.github.io/tutorial/#mesh-representation). g3cpp provides functions to convert to/from DMesh3 as follows:
+
+    Eigen::MatrixXd V; Eigen::MatrixXi F;   // your libigl mesh
+    DMesh3 mesh(V,F);                       // convert to DMesh3
+    mesh.ToIGLMesh(V,F);                    // convert DMesh3 to libigl mesh. Resizes V and F.
+
+Note that ToIGLMesh() properly handles gaps in the index spaces (ie if vertices or triangles were deleted), so there will not be a 1-1 correspondence between DMesh3 vert/tri indices and libigl row indices unless the DMesh3 is compact.
+    
+    
+    
