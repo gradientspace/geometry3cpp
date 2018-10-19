@@ -245,6 +245,26 @@ public:
     //{
     //}
 
+	// construct DMesh3 from libigl mesh representation
+	DMesh3(const Eigen::MatrixXd & V, const Eigen::MatrixXi & F) 
+		: DMesh3(false,false,false,false) 
+	{
+		gDevAssert(V.cols() == 3);
+		int NV = (int)V.rows();
+		for (int k = 0; k < NV; ++k) {
+			int vid = vertices_refcount.allocate();
+			int i = 3 * vid;
+			vertices.insertAt(V(k, 2), i + 2);
+			vertices.insertAt(V(k, 1), i + 1);
+			vertices.insertAt(V(k, 0), i);
+			allocate_edges_list(vid);
+		}
+		int NT = (int)F.rows();
+		for (int k = 0; k < NT; ++k) {
+			AppendTriangle(Index3i(F(k, 0), F(k, 1), F(k, 2)), -1);
+		}
+	}
+
 
 public:
 	//
@@ -3687,6 +3707,31 @@ public:
         updateTimeStamp(true);
         return MeshResult::Ok;
     }
+
+
+
+
+	void MakeIGLMesh(Eigen::MatrixXd & V, Eigen::MatrixXi & F) 
+	{
+		int NV = VertexCount();
+		V.resize(NV, 3);
+		for (int vid : VertexIndices()) {
+			int i = 3 * vid;
+			V(vid, 0) = vertices[i];
+			V(vid, 1) = vertices[i + 1];
+			V(vid, 2) = vertices[i + 2];
+		}
+
+		int NT = TriangleCount();
+		F.resize(NT, 3);
+		for (int tid : TriangleIndices()) {
+			int i = 3 * tid;
+			F(tid, 0) = triangles[i];
+			F(tid, 1) = triangles[i + 1];
+			F(tid, 2) = triangles[i + 2];
+		}
+	}
+
 
 
 
