@@ -3710,8 +3710,8 @@ public:
 
 
 
-
-	void MakeIGLMesh(Eigen::MatrixXd & V, Eigen::MatrixXi & F) 
+	// convert to vertex and triangle array mesh representation used by libigl
+	void ToIGLMesh(Eigen::MatrixXd & V, Eigen::MatrixXi & F) 
 	{
 		int NV = VertexCount();
 		V.resize(NV, 3);
